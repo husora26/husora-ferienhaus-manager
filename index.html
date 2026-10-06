@@ -132,6 +132,9 @@
     .empty { padding: 28px 16px; color: var(--muted); font-size: 12px; text-align: center; }
     .appointment { display: flex; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #f0f1ee; }
     .appointment:last-child { border-bottom: 0; }
+    button.appointment { width: 100%; border: 0; border-bottom: 1px solid #f0f1ee; color: inherit; background: transparent; text-align: left; cursor: pointer; }
+    button.appointment:hover .appointment-info strong, button.appointment:focus-visible .appointment-info strong { color: var(--green); }
+    button.appointment:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
     .date-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 42px; height: 45px; flex: none; border-radius: 8px; color: var(--green); background: var(--green-soft); }
     .date-tile b { font-size: 16px; line-height: 1.1; }
     .date-tile small { margin-top: 3px; font-size: 8px; font-weight: 700; text-transform: uppercase; }
@@ -1096,7 +1099,12 @@
           <section class="card"><div class="card-head"><div><h2 class="card-title">Service vor Ort</h2><p class="card-caption">${open.length} offene Aufgaben an deinen schwedischen Ferienhäusern</p></div><button class="text-btn" data-page="tasks">Alle Aufgaben →</button></div><div class="task-list">${open.length ? open.slice(0, 4).map(taskRow).join('') : '<div class="empty">Alles erledigt — großartig!</div>'}</div></section>
           <div>
             <section class="card"><div class="card-head"><div><h2 class="card-title">Nächste Buchungen</h2><p class="card-caption">Anreise, Endreinigung und Schlüssel</p></div><button class="text-btn" data-page="bookings">Buchungen →</button></div>
-              ${upcomingChanges.length ? upcomingChanges.map((event) => `<div class="appointment"><div class="date-tile"><b>${fmtDate(event.date).split(' ')[0]}</b><small>${fmtDate(event.date).split(' ')[1]}</small></div><div class="appointment-info"><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(event.detail)} · ${escapeHtml(event.time)}</small></div></div>`).join('') : '<div class="empty">Für deine Ferienhäuser sind keine Buchungen eingetragen.</div>'}
+              ${upcomingChanges.length ? upcomingChanges.map((event) => {
+                const appointment = `<div class="date-tile"><b>${fmtDate(event.date).split(' ')[0]}</b><small>${fmtDate(event.date).split(' ')[1]}</small></div><div class="appointment-info"><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(event.detail)} · ${escapeHtml(event.time)}</small></div>`;
+                return event.bookingId
+                  ? `<button type="button" class="appointment" data-edit-booking="${escapeHtml(event.bookingId)}" aria-label="Buchung bearbeiten: ${escapeHtml(event.title)}, ${escapeHtml(event.date)}">${appointment}</button>`
+                  : `<div class="appointment">${appointment}</div>`;
+              }).join('') : '<div class="empty">Für deine Ferienhäuser sind keine Buchungen eingetragen.</div>'}
             </section>
             <section class="card"><div class="card-head"><div><h2 class="card-title">Hausservice-Übersicht</h2><p class="card-caption">Prüfstatus und zugeordnete Servicepartner je Ferienhaus</p></div><button class="text-btn" data-page="inspections">Hauskontrolle →</button></div>
               <div class="house-service-list">${properties.map((property) => {
