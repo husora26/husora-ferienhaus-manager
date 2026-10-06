@@ -1,0 +1,1749 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f2">
+  <title>Husora — Ferienhaus-Manager</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #26342e;
+      --muted: #77817a;
+      --line: #e6e6dc;
+      --paper: #fffefa;
+      --canvas: #f5f3eb;
+      --green: #315d49;
+      --green-dark: #244a39;
+      --green-soft: #e8efe8;
+      --amber: #a87539;
+      --amber-soft: #f8f0e2;
+      --red: #a94e44;
+      --red-soft: #f9eae7;
+      --shadow: 0 10px 34px rgba(35, 48, 39, .045);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; background: radial-gradient(ellipse at 88% 0%, rgba(229, 236, 225, .52), transparent 34%), var(--canvas); color: var(--ink); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; }
+    .nav-menu-wrap { position: fixed; bottom: 20px; left: 50%; z-index: 20; transform: translateX(-50%); }
+    .icon-btn.menu-toggle svg { width: 21px; height: 21px; }
+    .icon-btn.menu-toggle { width: 56px; height: 56px; border: 2px solid white; border-radius: 50%; color: white; background: var(--green); box-shadow: 0 0 0 3px var(--green-soft), 0 7px 22px rgba(35,48,39,.32); transition: background .16s ease, box-shadow .16s ease, transform .16s ease; }
+    .icon-btn.menu-toggle:hover { background: var(--green-dark); box-shadow: 0 0 0 4px #dbe8dd, 0 9px 26px rgba(35,48,39,.36); transform: translateY(-2px); }
+    .icon-btn.menu-toggle:focus-visible { outline: 3px solid var(--amber); outline-offset: 5px; }
+    .nav-menu { position: absolute; bottom: calc(100% + 10px); left: 50%; z-index: 20; display: none; width: min(290px, calc(100vw - 26px)); padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); box-shadow: 0 16px 42px rgba(35,48,39,.16); transform: translateX(-50%); }
+    .nav-menu.open { display: block; }
+    .nav-menu-label { margin: 4px 10px 9px; color: #8a938c; font-size: 10px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; }
+    .nav { display: grid; gap: 4px; }
+    .nav button {
+      display: flex; align-items: center; gap: 13px; width: 100%; padding: 11px 13px; border: 0;
+      border-radius: 9px; color: #727a74; background: transparent; text-align: left; font-size: 13px; font-weight: 550;
+    }
+    .nav button:hover { color: var(--green); background: #f6f8f5; }
+    .nav button.active { color: var(--green); background: var(--green-soft); font-weight: 700; }
+    .nav svg { width: 17px; height: 17px; flex: none; }
+    .nav-count { margin-left: auto; padding: 2px 7px; border-radius: 20px; color: #fff; background: var(--green); font-size: 10px; }
+    main { max-width: 1510px; min-height: 100vh; margin: 0 auto; padding: 0 46px 50px; }
+    .topbar { position: sticky; top: 0; z-index: 30; isolation: isolate; display: flex; align-items: center; justify-content: space-between; width: 100vw; height: 82px; margin-left: calc(50% - 50vw); padding: 0 max(46px, calc((100vw - 1418px) / 2)); border-bottom: 1px solid var(--line); background: #000; }
+    .topbar::before { position: absolute; inset: 0; z-index: -1; background: url("assets/schweden-landschaft.jpg") center 48% / cover no-repeat; content: ""; opacity: .6; }
+    .breadcrumb { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 13px; }
+    .breadcrumb-home { display: grid; place-items: center; width: 31px; height: 31px; flex: none; padding: 0; border: 1px solid transparent; border-radius: 8px; background: transparent; }
+    .breadcrumb-home:hover, .breadcrumb-home:focus-visible { border-color: var(--line); background: rgba(255,254,250,.8); outline: none; }
+    .breadcrumb-home svg { width: 23px; height: 23px; }
+    .breadcrumb-brand { color: white; font-size: 24px; font-weight: 850; letter-spacing: 1px; }
+    .breadcrumb-separator, .breadcrumb #breadcrumb { display: none; }
+    .top-actions { display: flex; align-items: center; gap: 12px; }
+    .notification-wrap { position: relative; }
+    .notification-panel { position: absolute; top: calc(100% + 10px); right: 0; z-index: 31; display: none; width: min(360px, calc(100vw - 26px)); max-height: min(70vh, 480px); overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); box-shadow: 0 16px 42px rgba(35,48,39,.16); }
+    .notification-panel.open { display: block; }
+    .notification-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 16px 17px 12px; border-bottom: 1px solid var(--line); }
+    .notification-head strong { display: block; font-size: 12px; }
+    .notification-head small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .notification-count { flex: none; padding: 4px 7px; border-radius: 12px; color: var(--red); background: var(--red-soft); font-size: 9px; font-weight: 700; }
+    .notification-list { padding: 0 14px; }
+    .notification-list .task-row { min-height: 62px; gap: 9px; }
+    .notification-list .task-name { font-size: 11px; }
+    .notification-list .task-due { min-width: 58px; font-size: 9px; }
+    .notification-footer { display: flex; justify-content: flex-end; padding: 9px 17px 13px; border-top: 1px solid var(--line); }
+    .dot[hidden] { display: none; }
+    .icon-btn { position: relative; display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 10px; color: #59635b; background: white; }
+    .icon-btn svg { width: 16px; height: 16px; }
+    .dot { position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border: 1px solid white; border-radius: 50%; background: #d18b43; }
+    .page { padding-top: 31px; }
+    .welcome { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 25px; }
+    .eyebrow { margin: 0 0 8px; color: var(--green); font-size: 10px; font-weight: 750; letter-spacing: 1.2px; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(25px, 3vw, 32px); letter-spacing: -1.1px; line-height: 1.15; }
+    .subtitle { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+    .primary-btn, .secondary-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 39px; padding: 0 14px;
+      border: 1px solid transparent; border-radius: 8px; font-size: 12px; font-weight: 700; white-space: nowrap;
+    }
+    .primary-btn { color: white; background: var(--green); }
+    .primary-btn:hover { background: var(--green-dark); }
+    .secondary-btn { border-color: var(--line); color: #49544c; background: white; }
+    .primary-btn svg, .secondary-btn svg { width: 15px; height: 15px; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 21px; }
+    .stat, .card { border: 1px solid var(--line); border-radius: 12px; background: var(--paper); box-shadow: var(--shadow); }
+    .stat { position: relative; isolation: isolate; min-height: 120px; overflow: hidden; padding: 17px 18px; }
+    button.stat { width: 100%; color: inherit; text-align: left; }
+    .stat[data-page] { cursor: pointer; transition: transform .16s ease, box-shadow .16s ease; }
+    .stat[data-page]:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(35,48,39,.09); }
+    .stat > :not(.stat-art) { position: relative; z-index: 1; }
+    .stat-art { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; opacity: .2; pointer-events: none; }
+    .stat-head { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 11px; }
+    .stat-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; color: var(--green); background: var(--green-soft); }
+    button.stat-icon { padding: 0; border: 0; cursor: pointer; }
+    button.stat-icon:hover, button.stat-icon:focus-visible { outline: 2px solid #9db9a5; outline-offset: 2px; }
+    .stat-icon.amber { color: var(--amber); background: var(--amber-soft); }
+    .stat-icon svg { width: 15px; height: 15px; }
+    .stat-value { margin-top: 13px; font-size: 26px; font-weight: 730; letter-spacing: -.8px; }
+    .stat-note { margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .stat-note em { color: var(--green); font-style: normal; font-weight: 700; }
+    .columns { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, .9fr); align-items: start; gap: 17px; }
+    .card { overflow: hidden; }
+    .card + .card { margin-top: 17px; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 19px; border-bottom: 1px solid var(--line); }
+    .card-title { margin: 0; font-size: 13px; font-weight: 720; }
+    .card-caption { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .text-btn { padding: 4px 0; border: 0; color: var(--green); background: none; font-size: 11px; font-weight: 700; }
+    .task-list { padding: 0 19px; }
+    .task-row { display: flex; align-items: center; gap: 12px; min-height: 67px; border-bottom: 1px solid #f0f1ee; }
+    .task-row[data-edit-task] { cursor: pointer; }
+    .task-row[data-edit-task]:hover .task-name { color: var(--green); }
+    .task-row:last-child { border-bottom: 0; }
+    .check {
+      display: grid; place-items: center; width: 18px; height: 18px; flex: none; padding: 0;
+      border: 1.5px solid #cbd1ca; border-radius: 6px; color: white; background: white;
+    }
+    .check:hover { border-color: var(--green); }
+    .check.done { border-color: var(--green); background: var(--green); }
+    .check svg { width: 12px; height: 12px; }
+    .task-main { min-width: 0; flex: 1; }
+    .task-name { display: block; max-width: 100%; overflow: hidden; margin: 0 0 5px; padding: 0; border: 0; color: var(--ink); background: transparent; font-size: 12px; font-weight: 650; text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+    .task-name:focus-visible { outline: 2px solid #9db9a5; outline-offset: 2px; }
+    .task-name.completed { color: #9ba19c; text-decoration: line-through; }
+    .task-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; color: var(--muted); font-size: 10px; }
+    .task-tag, .status { display: inline-flex; align-items: center; padding: 4px 7px; border-radius: 5px; color: #64716a; background: #f1f3f0; font-size: 9px; font-weight: 650; }
+    .task-tag.urgent { color: var(--red); background: var(--red-soft); }
+    .task-tag.soon { color: var(--amber); background: var(--amber-soft); }
+    .task-due { min-width: 70px; color: #727a74; font-size: 10px; text-align: right; }
+    .empty { padding: 28px 16px; color: var(--muted); font-size: 12px; text-align: center; }
+    .appointment { display: flex; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #f0f1ee; }
+    .appointment:last-child { border-bottom: 0; }
+    .date-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 42px; height: 45px; flex: none; border-radius: 8px; color: var(--green); background: var(--green-soft); }
+    .date-tile b { font-size: 16px; line-height: 1.1; }
+    .date-tile small { margin-top: 3px; font-size: 8px; font-weight: 700; text-transform: uppercase; }
+    .appointment-info { min-width: 0; padding-top: 2px; }
+    .appointment-info strong { display: block; margin-bottom: 4px; font-size: 11px; }
+    .appointment-info small { display: block; color: var(--muted); font-size: 10px; }
+    .house-service-list { padding: 0 18px; }
+    .house-service-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid #f0f1ee; color: inherit; background: transparent; text-align: left; cursor: pointer; }
+    .house-service-row:last-child { border-bottom: 0; }
+    .house-service-row:hover .house-service-name { color: var(--green); }
+    .house-service-row:focus-visible { outline: 2px solid #9db9a5; outline-offset: 2px; }
+    .house-service-name { min-width: 0; font-size: 11px; font-weight: 650; }
+    .house-service-name small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; font-weight: 400; }
+    .house-service-partners { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; font-weight: 400; }
+    .house-service-row .inspection-status-badge { flex: none; margin-top: 0; }
+    .provider-card { display: flex; align-items: center; gap: 11px; padding: 13px 18px; }
+    .provider-avatar { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 10px; color: #725637; background: #f2eadf; font-size: 10px; font-weight: 750; }
+    .provider-info { flex: 1; }
+    .provider-info strong { display: block; font-size: 11px; }
+    .provider-info small { color: var(--muted); font-size: 9px; }
+    .rating { color: #9b712c; font-size: 10px; font-weight: 700; }
+    .provider-filters { display: flex; flex-wrap: wrap; gap: 9px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .provider-filters .search { flex: 1 1 210px; }
+    .provider-filters .search input { width: 100%; }
+    .provider-filters .search svg { top: 31px; }
+    .provider-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; padding: 16px; }
+    .provider-result { position: relative; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    .provider-result-top { display: flex; align-items: flex-start; gap: 10px; padding-right: 28px; }
+    .provider-result .provider-avatar { width: 37px; height: 37px; }
+    .provider-result h3 { margin: 1px 0 4px; font-size: 12px; }
+    .provider-result p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .favorite-btn { display: grid; place-items: center; width: 29px; height: 29px; padding: 0; border: 1px solid var(--line); border-radius: 8px; color: #858c86; background: #fff; }
+    .favorite-btn svg { width: 15px; height: 15px; }
+    .assign-provider-btn { display: grid; place-items: center; width: 25px; height: 25px; flex: none; margin-left: 7px; padding: 0; border: 1px solid #cbd1ca; border-radius: 7px; color: #68746b; background: white; cursor: pointer; }
+    .assign-provider-btn svg { width: 15px; height: 15px; }
+    .assign-provider-btn.selected { border-color: var(--green); color: white; background: var(--green); }
+    .assign-provider-btn:hover, .assign-provider-btn:focus-visible { outline: 2px solid #9db9a5; outline-offset: 2px; }
+    .property-assigned-partners { margin: 9px 0 0; color: var(--muted); font-size: 9px; line-height: 1.5; }
+    .property-assigned-partners strong { color: var(--ink); font-size: 9px; }
+    .favorite-btn.active { border-color: #f0dfd4; color: #bd694e; background: #fff5ef; }
+    .provider-details { display: flex; flex-wrap: wrap; gap: 7px 11px; margin: 14px 0 12px; color: #626c64; font-size: 10px; }
+    .provider-type { display: inline-block; padding: 4px 7px; border-radius: 5px; color: var(--green); background: var(--green-soft); font-size: 9px; font-weight: 700; }
+    .provider-type.renovation { color: #805526; background: var(--amber-soft); }
+    .provider-result-footer { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+    .provider-contact-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 10px; min-width: 0; }
+    .provider-source { color: var(--green); font-size: 10px; font-weight: 700; text-decoration: none; }
+    .provider-source:hover { text-decoration: underline; }
+    .provider-specialty { color: #626c64; font-size: 9px; }
+    .source-note { padding: 0 18px 14px; color: var(--muted); font-size: 9px; line-height: 1.5; }
+    .cost-summary { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(190px, .6fr); gap: 14px; margin: 17px 0; }
+    .cost-total { padding: 20px; border-radius: 12px; color: #fff; background: var(--green); }
+    .cost-total small { color: rgba(255,255,255,.76); font-size: 10px; }
+    .cost-total strong { display: block; margin-top: 8px; font-size: 30px; letter-spacing: -1px; }
+    .cost-total span { display: block; margin-top: 5px; color: rgba(255,255,255,.76); font-size: 10px; }
+    .cost-average { display: flex; flex-direction: column; justify-content: center; padding: 18px; }
+    .cost-average span { color: var(--muted); font-size: 10px; }
+    .cost-average strong { margin-top: 7px; font-size: 21px; }
+    .cost-list { padding: 0 18px; }
+    .cost-item { display: flex; align-items: center; gap: 12px; min-height: 67px; border-bottom: 1px solid #f0f1ee; }
+    .cost-item:last-child { border-bottom: 0; }
+    .cost-item-main { min-width: 0; flex: 1; }
+    .cost-item-main strong { display: block; margin-bottom: 4px; font-size: 11px; }
+    .cost-item-main small { color: var(--muted); font-size: 9px; }
+    .cost-input-wrap { display: flex; align-items: center; gap: 6px; }
+    .cost-input { width: 116px; height: 34px; padding: 0 8px; border: 1px solid var(--line); border-radius: 7px; text-align: right; font-size: 11px; }
+    .cost-input-wrap span { color: var(--muted); font-size: 10px; }
+    .cost-disclaimer { padding: 13px 18px; color: #745a35; background: #fffaf0; font-size: 10px; line-height: 1.6; }
+    .checklist { padding: 4px 18px; }
+    .checklist-item { display: flex; align-items: flex-start; gap: 11px; padding: 12px 0; border-bottom: 1px solid #f0f1ee; }
+    .checklist-item:last-child { border-bottom: 0; }
+    .checklist-item input { width: 16px; height: 16px; flex: none; margin: 2px 0 0; accent-color: var(--green); }
+    .checklist-item strong { display: block; margin-bottom: 3px; font-size: 11px; }
+    .checklist-item small { color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .inspection-tabs { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 15px; }
+    .inspection-tab { min-height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; color: #626c64; background: white; font-size: 11px; font-weight: 650; }
+    .inspection-tab.active { border-color: var(--green); color: var(--green); background: var(--green-soft); }
+    .winter-progress { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 10px; }
+    .winter-progress progress { width: 100px; height: 8px; accent-color: var(--green); }
+    .inspection-settings { display: grid; grid-template-columns: minmax(180px, .7fr) minmax(0, 1.3fr); gap: 16px; padding: 17px 18px; }
+    .inspection-settings-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; }
+    .inspection-option { display: flex; align-items: flex-start; gap: 8px; color: var(--ink); font-size: 10px; line-height: 1.45; }
+    .inspection-option input { flex: none; margin: 1px 0 0; accent-color: var(--green); }
+    .inspection-completion-date { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-top: 1px solid var(--line); }
+    .inspection-completion-date .form-label { margin: 0; }
+    .inspection-completion-date input { max-width: 180px; }
+    .inspection-history { padding: 12px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; line-height: 1.7; }
+    .inspection-status { padding: 11px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
+    .section-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 20px 0 13px; }
+    .search { position: relative; min-width: 200px; }
+    .search svg { position: absolute; top: 10px; left: 11px; width: 15px; height: 15px; color: #8b938c; }
+    .search input, .filter-select { height: 36px; border: 1px solid var(--line); border-radius: 8px; outline: none; color: var(--ink); background: white; font-size: 11px; }
+    .search input { width: min(270px, 35vw); padding: 0 10px 0 33px; }
+    .search input:focus, .filter-select:focus, .form-control:focus { border-color: #8ca897; box-shadow: 0 0 0 3px rgba(40, 92, 69, .08); }
+    .filter-select { padding: 0 28px 0 10px; }
+    .property-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+    .property-card { padding: 18px; }
+    .property-card[data-action="view-property"] { cursor: pointer; transition: border-color .18s, box-shadow .18s; }
+    .property-card[data-action="view-property"]:hover, .property-card[data-action="view-property"]:focus-visible { border-color: #b8c8ba; box-shadow: 0 5px 18px rgba(40, 73, 51, .08); outline: none; }
+    .remove-property-section { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; padding: 17px 19px; border: 1px solid #ead7d3; border-radius: 11px; background: #fffaf9; }
+    .remove-property-section strong { display: block; font-size: 11px; }
+    .remove-property-section p { margin: 5px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .danger-btn { flex: none; padding: 9px 12px; border: 1px solid #c98276; border-radius: 7px; color: #963e32; background: white; font-size: 10px; font-weight: 700; }
+    .danger-btn:hover { color: white; background: #a84437; border-color: #a84437; }
+    .property-card strong { font-size: 10px; line-height: 1.45; }
+    .property-photo { display: block; width: 100%; max-height: 240px; margin-bottom: 14px; border-radius: 9px; object-fit: cover; }
+    .property-card-photo { width: 100%; height: 150px; margin: -2px 0 12px; border-radius: 8px; object-fit: cover; }
+    .photo-preview { display: none; width: min(100%, 320px); max-height: 180px; margin-top: 10px; border-radius: 8px; object-fit: cover; }
+    .photo-preview.visible { display: block; }
+    .property-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .property-symbol { display: grid; place-items: center; width: 39px; height: 39px; border-radius: 11px; color: var(--green); background: var(--green-soft); }
+    .property-symbol svg { width: 19px; height: 19px; }
+    .property-card h3 { margin: 15px 0 4px; font-size: 14px; }
+    .inspection-status-badge { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; padding: 5px 8px; border-radius: 6px; color: var(--amber); background: var(--amber-soft); font-size: 9px; font-weight: 700; }
+    .inspection-status-badge.current { color: #256344; background: #e6f2e9; }
+    .inspection-status-badge svg { width: 13px; height: 13px; flex: none; }
+    .property-address { color: var(--muted); font-size: 10px; }
+    .property-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 19px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .property-details span { display: block; color: var(--muted); font-size: 9px; }
+    .property-details strong { display: block; margin-top: 4px; font-size: 11px; }
+    .view-title { margin-bottom: 4px; font-size: 16px; font-weight: 720; }
+    .table-wrap { overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .data-table th { padding: 12px 16px; color: #858c86; background: #fafbf9; font-size: 9px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+    .data-table td { padding: 14px 16px; border-top: 1px solid #f0f1ee; font-size: 11px; white-space: nowrap; }
+    .data-table td:first-child { font-weight: 650; }
+    .status { color: var(--green); background: var(--green-soft); }
+    .status.pending { color: var(--amber); background: var(--amber-soft); }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 10; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(25, 34, 28, .36); }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: min(440px, 100%); padding: 23px; border: 1px solid var(--line); border-radius: 14px; background: white; box-shadow: 0 24px 80px rgba(0, 0, 0, .18); }
+    .modal-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+    .modal h2 { margin: 0; font-size: 18px; letter-spacing: -.4px; }
+    .modal-head p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+    .close-btn { display: grid; place-items: center; width: 29px; height: 29px; border: 0; border-radius: 7px; color: #707970; background: #f4f5f2; }
+    .form-grid { display: grid; gap: 14px; }
+    .property-modal { width: min(680px, 100%); max-height: 90vh; overflow-y: auto; }
+    .property-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+    .property-form-grid .full { grid-column: 1 / -1; }
+    .form-control.textarea { height: auto; min-height: 76px; padding: 9px 10px; resize: vertical; line-height: 1.5; }
+    .property-specs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .property-spec { padding: 5px 7px; border-radius: 6px; color: #59665d; background: #f3f5f1; font-size: 9px; }
+    .property-notes { margin-top: 13px; padding-top: 11px; border-top: 1px solid var(--line); color: #5d665f; font-size: 10px; line-height: 1.55; }
+    .property-notes strong { color: var(--ink); }
+    .property-detail-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .property-detail-grid .property-card { padding: 13px; }
+    .property-detail-grid .property-card strong { display: block; font-size: 11px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+    .property-detail-grid .form-label { margin-bottom: 4px; font-size: 9px; }
+    .calendar-toolbar { display: flex; align-items: center; gap: 10px; }
+    .calendar-toolbar strong { min-width: 145px; text-align: center; font-size: 13px; }
+    .calendar-nav { display: grid; place-items: center; width: 31px; height: 31px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: white; }
+    .calendar-nav:hover { color: var(--green); border-color: #b8c8ba; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; padding: 14px; }
+    .calendar-weekday { padding: 5px 0; color: var(--muted); font-size: 9px; font-weight: 700; text-align: center; }
+    .calendar-day { position: relative; min-height: 72px; padding: 8px; border: 1px solid #eef0ec; border-radius: 8px; color: var(--ink); background: white; text-align: left; }
+    .calendar-day:hover { border-color: #b8c8ba; background: #f8faf7; }
+    .calendar-day.outside { color: #aab0aa; background: #f8f9f7; }
+    .calendar-day.selected { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
+    .calendar-date-button { display: block; width: 100%; margin: 0; padding: 0; border: 0; color: inherit; background: transparent; text-align: left; }
+    .calendar-day.today .calendar-day-number { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: white; background: var(--green); }
+    .calendar-day-number { font-size: 11px; font-weight: 650; }
+    .calendar-dots { display: flex; gap: 3px; margin-top: 8px; }
+    .calendar-event-chip { display: block; overflow: hidden; width: 100%; margin-top: 5px; padding: 3px 4px; border: 0; border-radius: 4px; color: var(--green-dark); background: var(--green-soft); font-size: 8px; line-height: 1.3; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+    button.calendar-event-chip { cursor: pointer; }
+    button.calendar-event-chip:hover, button.calendar-event-chip:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+    .calendar-event-chip.task { color: #805526; background: var(--amber-soft); }
+    .calendar-view-toggle { display: flex; flex: none; gap: 3px; padding: 3px; border-radius: 8px; background: #f1f2ed; }
+    .calendar-view-toggle button { padding: 6px 9px; border: 0; border-radius: 6px; color: var(--muted); background: transparent; font-size: 10px; }
+    .calendar-view-toggle button.active { color: var(--green); background: white; box-shadow: 0 1px 3px rgba(0,0,0,.08); font-weight: 700; }
+    .calendar-week-view .calendar-day { min-height: 130px; }
+    .calendar-week-view .calendar-event-chip { font-size: 9px; }
+    .calendar-event-chip { display: block; overflow: hidden; margin-top: 5px; padding: 3px 4px; border-radius: 4px; color: var(--green-dark); background: var(--green-soft); font-size: 8px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+    .calendar-event-chip.task { color: #805526; background: var(--amber-soft); }
+    .calendar-view-toggle { display: flex; gap: 3px; padding: 3px; border-radius: 8px; background: #f1f2ed; }
+    .calendar-view-toggle button { padding: 6px 9px; border: 0; border-radius: 6px; color: var(--muted); background: transparent; font-size: 10px; }
+    .calendar-view-toggle button.active { color: var(--green); background: white; box-shadow: 0 1px 3px rgba(0,0,0,.08); font-weight: 700; }
+    .calendar-week-view .calendar-day { min-height: 130px; }
+    .calendar-week-view .calendar-event-chip { font-size: 9px; }
+    .calendar-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .calendar-dot.task { background: var(--amber); }
+    .calendar-legend { display: flex; gap: 16px; padding: 0 18px 14px; color: var(--muted); font-size: 10px; }
+    .calendar-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .calendar-event { display: flex; align-items: flex-start; gap: 12px; padding: 13px 18px; border-top: 1px solid #f0f1ee; }
+    button.calendar-event { width: 100%; border: 0; color: inherit; background: transparent; text-align: left; cursor: pointer; }
+    button.calendar-event:hover strong { color: var(--green); }
+    .calendar-event-time { min-width: 42px; color: var(--green); font-size: 10px; font-weight: 700; }
+    .calendar-event strong { display: block; font-size: 11px; }
+    .calendar-event small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .profile-form { max-width: 650px; padding: 20px; }
+    .profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .profile-grid .full { grid-column: 1 / -1; }
+    .profile-notice { margin-top: 16px; padding: 13px 15px; border-radius: 9px; color: #745a35; background: #fff8e9; font-size: 11px; line-height: 1.6; }
+    .profile-heading { display: flex; align-items: center; gap: 14px; padding: 18px; border-bottom: 1px solid var(--line); background: linear-gradient(120deg, #f4f1e5, #eef2e9); }
+    .profile-large-avatar { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 17px; color: white; background: var(--green); font-size: 15px; font-weight: 750; }
+    .profile-heading strong { display: block; font-size: 14px; }
+    .profile-heading small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .property-edit { padding: 4px 0; border: 0; color: var(--green); background: transparent; font-size: 10px; font-weight: 700; }
+    .form-label { display: block; margin-bottom: 6px; color: #576159; font-size: 10px; font-weight: 700; }
+    .form-control { width: 100%; height: 39px; padding: 0 10px; border: 1px solid var(--line); border-radius: 7px; outline: none; color: var(--ink); background: white; font-size: 11px; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+    .toast { position: fixed; right: 24px; bottom: 23px; z-index: 15; padding: 12px 16px; border-radius: 9px; color: white; background: #263c30; box-shadow: var(--shadow); font-size: 12px; opacity: 0; transform: translateY(8px); pointer-events: none; transition: .2s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 1050px) {
+      main { padding-right: 27px; padding-left: 27px; }
+      .topbar { padding-right: 27px; padding-left: 27px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .columns { grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr); }
+    }
+    @media (max-width: 760px) {
+      main { padding-right: 20px; padding-left: 20px; }
+      .columns { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      main { padding: 0 13px 35px; }
+      .topbar { height: 65px; }
+      .topbar { padding-right: 13px; padding-left: 13px; }
+      .notification-panel { position: fixed; top: 75px; right: 13px; left: 13px; width: auto; max-height: calc(100vh - 95px); }
+      .breadcrumb { gap: 6px; font-size: 11px; }
+      .breadcrumb-home { width: 27px; height: 27px; }
+      .breadcrumb-home svg { width: 20px; height: 20px; }
+      .breadcrumb-brand { font-size: 19px; }
+      .top-actions { gap: 7px; }
+      .welcome { align-items: flex-start; flex-direction: column; gap: 15px; }
+      .welcome .primary-btn { align-self: stretch; }
+      .stats { gap: 9px; }
+      .stat { min-height: 105px; padding: 13px; }
+      .stat-value { font-size: 23px; }
+      .property-grid { grid-template-columns: 1fr; }
+      .section-toolbar { align-items: stretch; flex-direction: column; }
+      .search input { width: 100%; }
+      .toolbar-right { display: flex; gap: 8px; }
+      .filter-select { flex: 1; }
+      .provider-results { grid-template-columns: 1fr; padding: 12px; }
+      .cost-summary { grid-template-columns: 1fr; }
+      .cost-input { width: 98px; }
+      .property-form-grid { grid-template-columns: 1fr; }
+      .property-form-grid .full { grid-column: auto; }
+      .property-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .calendar-grid { gap: 3px; padding: 8px; }
+      .calendar-day { min-height: 53px; padding: 5px; }
+      .calendar-dots { margin-top: 5px; }
+      .calendar-toolbar strong { min-width: 120px; font-size: 11px; }
+      .profile-grid { grid-template-columns: 1fr; }
+      .inspection-settings { grid-template-columns: 1fr; }
+      .inspection-settings-list { grid-template-columns: 1fr; }
+      .calendar-toolbar { flex-wrap: wrap; justify-content: center; gap: 6px; }
+      .calendar-toolbar strong { min-width: 105px; }
+      .calendar-grid { overflow: hidden; }
+      .calendar-day { min-width: 0; }
+      .calendar-event-chip { font-size: 7px; padding: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <main>
+      <header class="topbar">
+        <div class="breadcrumb"><button class="breadcrumb-home" data-page="dashboard" aria-label="Zur Übersicht" title="Zur Übersicht"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 10.2 12 2.8l9.5 7.4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 9.2V21h14V9.2L12 3.8 5 9.2Z" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/><path d="M10 21v-6h4v6M7.5 11h2.3v2.3H7.5zM14.2 11h2.3v2.3h-2.3z" fill="#000" stroke="#000" stroke-width=".7"/></svg></button><span class="breadcrumb-brand">HUSORA</span><span class="breadcrumb-separator" aria-hidden="true">/</span><b id="breadcrumb">Übersicht</b></div>
+        <div class="top-actions">
+          <div class="notification-wrap">
+            <button class="icon-btn" id="notify-button" aria-label="Dringende Aufgaben" title="Dringende Aufgaben" aria-expanded="false" aria-controls="notification-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="dot"></span></button>
+            <section class="notification-panel" id="notification-panel" aria-label="Dringendste Aufgaben"></section>
+          </div>
+          <button class="icon-btn" id="settings-button" aria-label="Benutzer und Einstellungen" title="Benutzer und Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.4.8l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.4-.8l-1.7.7-1.4-2.4 1.4-1.1a7 7 0 0 1 0-1.7l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.4-.8l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.4.8l1.7-.7 1.4 2.4-1.4 1.1a7 7 0 0 1 0 1.7z" transform="translate(-1 -1)"/></svg></button>
+        </div>
+      </header>
+      <div class="page" id="page-content"></div>
+    </main>
+    <div class="nav-menu-wrap">
+      <button class="icon-btn menu-toggle" id="menu-toggle" aria-label="Menü öffnen" aria-expanded="false" aria-controls="main-menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div class="nav-menu" id="main-menu">
+        <div class="nav-menu-label">Navigation</div>
+        <nav class="nav" aria-label="Hauptnavigation">
+          <button class="active" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg><span>Übersicht</span></button>
+          <button data-page="properties"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 21V5l8-2 8 2v16"/><path d="M8 8h2m4 0h2M8 12h2m4 0h2M10 21v-5h4v5"/></svg><span>Objektverwaltung</span></button>
+          <button data-page="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h2m4 0h2m-8 3h2"/></svg><span>Kalender</span></button>
+          <button data-page="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M8.5 10h7m-7 4h7m-7 4h4"/></svg><span>Serviceaufgaben</span><i class="nav-count" id="nav-count">0</i></button>
+          <button data-page="inspections"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg><span>Hauskontrolle</span></button>
+          <button data-page="providers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14.5 6.5a5 5 0 0 0-6.7 6.7L3 18l3 3 4.8-4.8a5 5 0 0 0 6.7-6.7l-3.1 3.1-3-3z"/><path d="m15.5 4.5 4 4"/></svg><span>Servicepartner finden</span></button>
+          <button data-page="costs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6.5h14a2 2 0 0 1 2 2v11H5a2 2 0 0 1-2-2V6a3 3 0 0 1 3-3h12"/><path d="M3 7h17v5h-5a2 2 0 0 0 0 4h5"/><path d="M15.5 14.5h.01"/></svg><span>Jahreskosten</span></button>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="task-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <form class="modal" id="task-form">
+      <div class="modal-head"><div><h2 id="modal-title">Aufgabe erstellen</h2><p>Behalte alle wichtigen Arbeiten im Blick.</p></div><button class="close-btn" type="button" id="close-modal" aria-label="Schließen">✕</button></div>
+      <div class="form-grid">
+        <label><span class="form-label">Aufgabe</span><input class="form-control" name="title" placeholder="z. B. Saunaofen vor Anreise prüfen" required maxlength="90"></label>
+        <label><span class="form-label">Ferienhaus</span><select class="form-control" name="property"></select></label>
+        <label><span class="form-label">Fällig am</span><input class="form-control" name="date" type="date" required></label>
+        <label><span class="form-label">Priorität</span><select class="form-control" name="priority"><option value="normal">Normal</option><option value="soon">Wichtig</option><option value="urgent">Dringend</option></select></label>
+      </div>
+      <div class="form-actions"><button type="button" class="secondary-btn" id="cancel-modal">Abbrechen</button><button type="submit" class="primary-btn">Aufgabe speichern</button></div>
+    </form>
+  </div>
+      <div class="modal-backdrop" id="property-modal" role="dialog" aria-modal="true" aria-labelledby="property-modal-title">
+        <form class="modal property-modal" id="property-form">
+          <div class="modal-head"><div><h2 id="property-modal-title">Ferienhaus hinzufügen</h2><p>Erfasse Gebäude, Grundstück und geplante Sanierungen.</p></div><button class="close-btn" type="button" id="close-property-modal" aria-label="Schließen">✕</button></div>
+          <div class="property-form-grid">
+            <label><span class="form-label">Name des Ferienhauses *</span><input class="form-control" name="name" required maxlength="80" placeholder="z. B. Stuga am See"></label>
+            <label><span class="form-label">Adresse / Ort *</span><input class="form-control" name="address" required maxlength="140" placeholder="Straße, Postleitzahl und Ort"></label>
+            <label><span class="form-label">Region / Provinz</span><input class="form-control" name="region" maxlength="60" placeholder="z. B. Dalarna"></label>
+            <label><span class="form-label">Baujahr</span><input class="form-control" name="yearBuilt" type="number" min="1600" max="2100" placeholder="z. B. 1986"></label>
+            <label><span class="form-label">Wohnfläche (m²)</span><input class="form-control" name="livingArea" type="number" min="0" step="0.1" placeholder="z. B. 92"></label>
+            <label><span class="form-label">Grundstücksgröße (m²)</span><input class="form-control" name="plotSize" type="number" min="0" step="1" placeholder="z. B. 1.250"></label>
+            <label><span class="form-label">Anzahl Zimmer</span><input class="form-control" name="rooms" type="number" min="0" step="1" placeholder="z. B. 4"></label>
+            <label><span class="form-label">Schlafplätze</span><input class="form-control" name="beds" type="number" min="0" step="1" placeholder="z. B. 6"></label>
+            <label><span class="form-label">Heizsystem</span><select class="form-control" name="heatingSystem"><option value="">Bitte auswählen</option><option>Wärmepumpe</option><option>Direktstrom / Elektroheizung</option><option>Holzofen / Kamin</option><option>Pelletheizung</option><option>Ölheizung</option><option>Fernwärme</option><option>Andere</option></select></label>
+            <label><span class="form-label">Baujahr der Heizungsanlage</span><input class="form-control" name="heatingYear" type="number" min="1600" max="2100" placeholder="z. B. 2018"></label>
+            <label><span class="form-label">Kamin / Feuerstätte vorhanden?</span><select class="form-control" name="fireplace"><option value="">Bitte auswählen</option><option value="yes">Ja</option><option value="no">Nein</option></select></label>
+            <label><span class="form-label">Kaminart</span><select class="form-control" name="fireplaceType"><option value="">Bitte auswählen</option><option>Kaminofen</option><option>Offener Kamin</option><option>Kachelofen</option><option>Holzherd</option><option>Pellet-Ofen</option><option>Sonstige</option></select></label>
+            <label><span class="form-label">Letzte Kamin-/Schornsteinkontrolle</span><input class="form-control" name="fireplaceInspection" type="date"></label>
+            <label class="full"><span class="form-label">Angaben zu Kamin / Feuerstätte</span><input class="form-control" name="fireplaceNotes" maxlength="300" placeholder="z. B. letzte Kehrung, Besonderheiten oder vereinbarter Prüfturnus"></label>
+            <label class="full"><span class="form-label">Hausfoto</span><input class="form-control" name="photo" type="file" accept="image/*"><span class="form-label" style="margin-top:6px">Das Bild wird verkleinert im Browser gespeichert.</span><img class="photo-preview" id="property-photo-preview" alt="Vorschau des Hausfotos"><button class="text-btn" type="button" id="remove-property-photo" style="display:none">Foto entfernen</button></label>
+            <label class="full"><span class="form-label">Zustand des Gebäudes</span><select class="form-control" name="condition"><option value="">Bitte auswählen</option><option>Sehr gut</option><option>Gut</option><option>Gepflegt, kleinere Arbeiten nötig</option><option>Sanierungsbedarf</option><option>Dringender Sanierungsbedarf</option><option>Noch nicht bewertet</option></select></label>
+            <label class="full"><span class="form-label">Letzte Sanierungen (Jahr und Maßnahme)</span><textarea class="form-control textarea" name="lastRenovations" maxlength="1500" placeholder="z. B. 2021: Dach erneuert; 2018: Bad modernisiert"></textarea></label>
+            <label class="full"><span class="form-label">Anstehende Sanierungen (Maßnahme und Zeitraum)</span><textarea class="form-control textarea" name="plannedRenovations" maxlength="1500" placeholder="z. B. Fenster in 1–2 Jahren; Fassade in 3–5 Jahren"></textarea></label>
+          </div>
+          <div class="form-actions"><button type="button" class="secondary-btn" id="cancel-property-modal">Abbrechen</button><button type="submit" class="primary-btn">Ferienhaus speichern</button></div>
+        </form>
+      </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    const icon = (name) => {
+      const paths = {
+        check: '<path d="m5 12 4 4L19 6"/>',
+        home: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/>',
+        property: '<path d="M4 21V5l8-2 8 2v16"/><path d="M8 8h2m4 0h2M8 12h2m4 0h2M10 21v-5h4v5"/>',
+        task: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M8.5 10h7m-7 4h7m-7 4h4"/>',
+        calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h2m4 0h2m-8 3h2"/>',
+        inspection: '<path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6z"/><path d="m8.5 12 2.2 2.2 4.8-5"/>',
+        search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+        plus: '<path d="M12 5v14M5 12h14"/>'
+      };
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ''}</svg>`;
+    };
+    const initialTasks = [
+      { id: 1, title: 'Endreinigung vor dem Gästewechsel organisieren', property: 'Stuga Björkbacken', date: '2026-10-07', priority: 'urgent', done: false },
+      { id: 2, title: 'Brunnenwasserfilter und Frostschutz prüfen', property: 'Sjöstugan', date: '2026-10-08', priority: 'soon', done: false },
+      { id: 3, title: 'Saunaofen und Rauchmelder kontrollieren', property: 'Kusthuset', date: '2026-10-09', priority: 'normal', done: false },
+      { id: 4, title: 'Schlüsselbox für nächste Anreise vorbereiten', property: 'Stuga Björkbacken', date: '2026-10-11', priority: 'normal', done: false },
+      { id: 5, title: 'Kaminzug vor der Wintersaison prüfen', property: 'Sjöstugan', date: '2026-10-12', priority: 'normal', done: true }
+    ];
+    const guestChanges = [
+      { id: 'guest-1', title: 'Check-in · Stuga Björkbacken', property: 'Stuga Björkbacken', date: '2026-10-06', time: '15:00', detail: 'Schlüsselbox vorbereiten', type: 'guest' },
+      { id: 'guest-2', title: 'Endreinigung · Sjöstugan', property: 'Sjöstugan', date: '2026-10-08', time: '11:00', detail: 'Dala Städ & Tillsyn', type: 'guest' },
+      { id: 'guest-3', title: 'Check-in · Kusthuset', property: 'Kusthuset', date: '2026-10-10', time: '15:00', detail: 'Gästeankunft', type: 'guest' }
+    ];
+    const initialProperties = [
+      { id: 'sunne', name: 'Stuga Björkbacken', address: 'Sunne, Värmland, Schweden', region: 'Värmland', beds: '6 Schlafplätze', tasks: '2 offene Aufgaben' },
+      { id: 'rattvik', name: 'Sjöstugan', address: 'Rättvik, Dalarna, Schweden', region: 'Dalarna', beds: '4 Schlafplätze', tasks: '2 offene Aufgaben' },
+      { id: 'grebbestad', name: 'Kusthuset', address: 'Grebbestad, Bohuslän, Schweden', region: 'Bohuslän', beds: '8 Schlafplätze', tasks: '1 offene Aufgabe' }
+    ];
+    let properties = initialProperties.map((property) => ({
+      ...property,
+      yearBuilt: '',
+      livingArea: '',
+      plotSize: '',
+      rooms: '',
+      condition: '',
+      heatingSystem: '',
+      heatingYear: '',
+      fireplace: '',
+      fireplaceType: '',
+      fireplaceInspection: '',
+      fireplaceNotes: '',
+      photo: '',
+      lastRenovations: '',
+      plannedRenovations: ''
+    }));
+    try {
+      const savedProperties = localStorage.getItem('stugliv-properties');
+      if (savedProperties) {
+        const stored = JSON.parse(savedProperties);
+        if (!Array.isArray(stored) || stored.some((property) => !property || typeof property.id !== 'string' || typeof property.name !== 'string')) {
+          throw new Error('Ungültige Ferienhausdaten');
+        }
+        properties = stored;
+      }
+    } catch (error) {
+      console.error('Ferienhäuser konnten nicht geladen werden:', error);
+    }
+    const propertyWithDefaults = (property) => ({
+      yearBuilt: '',
+      livingArea: '',
+      plotSize: '',
+      rooms: '',
+      condition: '',
+      heatingSystem: '',
+      heatingYear: '',
+      fireplace: '',
+      fireplaceType: '',
+      fireplaceInspection: '',
+      fireplaceNotes: '',
+      photo: '',
+      lastRenovations: '',
+      plannedRenovations: '',
+      ...property
+    });
+    const providers = [
+      { id: 'solrosen-sunne', initials: 'SS', name: 'Solrosen Städ & Fönsterputs', category: 'house', services: 'Reinigung · Fenster · Gartenarbeit', town: 'Sunne', website: 'https://solrosen-stad.se/vara-tjanster/', distances: { sunne: 1 } },
+      { id: 'rutan-torsby', initials: 'RT', name: 'Rutan i Torsby AB', category: 'house', services: 'Reinigung · Gartenservice', town: 'Torsby', website: 'https://www.rutan.nu/', distances: { sunne: 34 } },
+      { id: 'sunne-byggnads', initials: 'SB', name: 'Sunne Byggnads AB', category: 'renovation', services: 'Neubau · Renovierung · Bauprojekte', town: 'Sunne', website: 'https://www.sunnebyggnads.se/om-oss/', distances: { sunne: 1 } },
+      { id: 'tallbergs-hustillsyn', initials: 'TH', name: 'Tällbergs Hustillsyn AB', category: 'inspection', services: 'Ferienhauskontrolle · Wasser · Heizung · Dach · Lüftung · Reinigung', town: 'Tällberg', website: 'https://tallbergshustillsyn.se/', distances: { rattvik: 10 } },
+      { id: 'edgyr', initials: 'EG', name: 'EdGyr AB', category: 'renovation', services: 'Renovierung · Umbau · Neubau', town: 'Rättvik', website: 'https://edgyr.se/om-oss/', distances: { rattvik: 2 } },
+      { id: 'reso-stad', initials: 'RS', name: 'Resö Städ', category: 'house', services: 'Ferienhausreinigung · Grundreinigung · Auszugsreinigung', town: 'Resö', website: 'https://www.resostad.se/faq', distances: { grebbestad: 13 } },
+      { id: 'bygglusth', initials: 'BL', name: 'AB Bygglusth', category: 'renovation', services: 'Renovierung · Küche · Bad · Dach · Fassade', town: 'Fjällbacka', website: 'https://bygglusth.se/byggtjanster-fjallbacka-hamburgsund-grebbestad-tanum-bovallstrand/renovering-fjallbacka-hamburgsund-grebbestad-tanum-bovallstrand/', distances: { grebbestad: 11 } },
+      { id: 'webk', initials: 'WB', name: 'WeBK AB', category: 'renovation', services: 'Neubau · Umbau · Renovierung', town: 'Sunne', website: 'https://www.webk.se/tj%C3%A4nster', distances: { sunne: 1 } },
+      { id: 'diversearbetaren', initials: 'DA', name: 'Diversearbetaren i Rättvik AB', category: 'house', services: 'Garten · Schnee · Reinigung · Reparaturen · kleinere Bauarbeiten', town: 'Rättvik', website: 'https://diversearbetaren.se/', distances: { rattvik: 1 } },
+      { id: 'fjallbacka-stadservice', initials: 'FS', name: 'Fjällbacka Städservice AB', category: 'house', services: 'Hausreinigung · Umzugsreinigung · Bauendreinigung', town: 'Grebbestad', website: 'https://www.fjallbackastadservice.se/', distances: { grebbestad: 1 } },
+      { id: 'vaster-bygg', initials: 'VB', name: 'Väster Bygg i Bohuslän AB', category: 'renovation', services: 'Neubau · Reparaturen · Umbau und Erweiterung', town: 'Grebbestad', website: 'https://www.vasterbygg.com/om-oss/', distances: { grebbestad: 1 } },
+      { id: 'nortivo', initials: 'NS', name: 'Nortivo Service AB', category: 'inspection', specialty: 'Hausbetreuung / Reinigung', priority: 'A', services: 'Fritidshus-Tillsyn · Reinigung · Rasen · einfache Instandhaltung', town: 'Sunne / ganz Värmland', phone: '079-104 20 46', email: 'bokning@nortivoservice.se', website: 'https://nortivoservice.se/nortivo-fritidsboende/', distances: { sunne: 0 } },
+      { id: 'nordbas', initials: 'NB', name: 'Nordbas Fastighetsservice', category: 'inspection', services: 'Ferienhaus-Tillsyn mit Fotorapport · Objektrundgänge · dokumentierte Kontrollen', town: 'Einsatzgebiet Rättvik', website: 'https://www.nordbas.com/fastighetsskotsel-leksand.html', distances: { rattvik: 0 } },
+      { id: 'hustillsyn-bohuslan', initials: 'HB', name: 'Hustillsyn i Bohuslän', category: 'inspection', services: 'Hauskontrolle: Heizung, Wasser, Kühlgeräte, Fenster, Türen, Keller, Lecks & Außenbereich', town: 'Einsatzgebiet Grebbestad', website: 'https://hustillsyn-bohuslan.se/', distances: { grebbestad: 0 } },
+      { id: 'gasthamnsbolaget', initials: 'GB', name: 'Gästhamnsbolaget · Bostadstillsyn', category: 'inspection', services: 'Regelmäßige Innen- und Außenkontrollen · Heizung, Wasser, Sicherungen, Schädlingsfallen', town: 'Hamburgsund', website: 'https://gasthamnsbolaget.se/tjanster/bostadstillsyn/', distances: { grebbestad: 15 } }
+    ];
+    const databasePartners = [
+      { id: 'varmland-h001', name: 'D&T Homecare', category: 'house', specialty: 'Hausbetreuung / Fritidshus', town: 'Värmland', services: 'Haussitting, Hausmeister, Garten, Winterdienst', email: 'dnthomecare@gmail.com', website: 'https://www.dnthomecare.se/', priority: 'A' },
+      { id: 'varmland-h003', name: 'Värmlands Trädgård AB', category: 'inspection', specialty: 'Hausbetreuung / Garten', town: 'Kil / regional', services: 'Fritidshus-Tillsyn, Innen-/Außenkontrolle, Garten, Schnee, Fotobericht', phone: '076-114 64 04', email: 'jocke@varmlandstradgard.com', website: 'https://www.varmlandstradgard.com/', priority: 'A' },
+      { id: 'varmland-h004', name: 'Torsby BoPro Service / Torsbyservice', category: 'inspection', specialty: 'Hausbetreuung / Handwerk', town: 'Stöllet / Torsby', services: 'Immobilienkontrolle, Wetter-/Winterkontrolle, Schlüssel, Handwerkerbegleitung, kleine Reparaturen', phone: '073-487 53 32', email: 'torsbyservice@gmail.com', website: 'https://torsbyservice.se/', priority: 'A' },
+      { id: 'varmland-h005', name: 'Boda Bygg & Hemservice', category: 'house', specialty: 'Hausbetreuung / Bau', town: 'Skillingsfors / westliches Värmland', services: 'Garten, Reparaturen, Renovierung, Neubau, Service', phone: '0708-86 11 16', email: 'robban@bodabygg.nu', website: 'https://www.bodabygg.nu/', priority: 'A' },
+      { id: 'varmland-h006', name: 'SAKON Entreprenad', category: 'house', specialty: 'Garten / Winter / Grundstück', town: 'Värmland', services: 'Schnee, Streuen, Rasen, Baumfällung, Erdarbeiten, Grundstückspflege', phone: '010-66 00 533', website: 'https://www.sakonentreprenad.se/', priority: 'A' },
+      { id: 'varmland-h007', name: 'Trädgårdsmästarna i Värmland AB', category: 'house', specialty: 'Garten / Außenanlagen', town: 'Karlstad', services: 'Garten, Rasen, Schnee, Grundstückspflege', phone: '070-272 44 66', priority: 'A' },
+      { id: 'varmland-h008', name: 'Gräsdalens Service', category: 'house', specialty: 'Garten / Außenanlagen', town: 'Karlstad', services: 'Außenanlagen, Garten, Schnee, Pflaster', phone: '054-56 38 70', priority: 'A' },
+      { id: 'varmland-h009', name: 'Städkamrater AB', category: 'house', specialty: 'Reinigung', town: 'Karlstad', services: 'Hausreinigung, Umzugsreinigung', phone: '072-729 02 93', priority: 'A' },
+      { id: 'varmland-h010', name: 'PK Städservice', category: 'house', specialty: 'Reinigung', town: 'Kristinehamn / Värmland', services: 'Privat-/Gewerbereinigung, Schlüsselhandling', phone: '070-316 84 80', priority: 'A' },
+      { id: 'varmland-h011', name: 'Elit Hemservice Sverige AB', category: 'house', specialty: 'Reinigung / Fenster', town: 'Karlstad', services: 'Haus-, Fenster-, Textil-/Polsterreinigung', phone: '054-24 05 55', priority: 'A' },
+      { id: 'varmland-h012', name: 'Joro Städ', category: 'house', specialty: 'Reinigung', town: 'Kil / Värmland', services: 'Hausreinigung, Fenster, Einzel-/Abo-Reinigung', phone: '076-005 20 28', priority: 'A' },
+      { id: 'varmland-h013', name: 'Lena Städ Karlstad', category: 'house', specialty: 'Reinigung', town: 'Karlstad', services: 'Haus-, Umzugs-, Bau-, Fensterreinigung', phone: '079-012 00 82', priority: 'A' },
+      { id: 'varmland-h014', name: 'Lux Städ / Lux Värmland AB', category: 'house', specialty: 'Reinigung / Gebäudehülle', town: 'Karlstad / Värmland', services: 'Reinigung, Fassaden-/Dachwäsche, Algen', phone: '073-545 05 61', priority: 'A' },
+      { id: 'varmland-h015', name: 'MH EL-Idé AB', category: 'renovation', specialty: 'Elektro', town: 'Karlstad', services: 'Elektroservice und Installationen', phone: '070-980 80 94', priority: 'B' },
+      { id: 'varmland-h016', name: 'TM Elab Direct', category: 'renovation', specialty: 'Elektro', town: 'Forshaga / Karlstad', services: 'Elektroinstallation und Service', phone: '070-353 82 80', priority: 'B' },
+      { id: 'varmland-h017', name: 'Rydahls Elektriska Eftr AB', category: 'renovation', specialty: 'Elektro', town: 'Karlstad', services: 'Elektroservice und Installationen', phone: '054-69 08 50', priority: 'B' },
+      { id: 'varmland-h018', name: 'Elteknik Fredrik Johansson AB', category: 'renovation', specialty: 'Elektro', town: 'Karlstad / Hammarö / Forshaga / Kil / Grums', services: 'Service und Elektroinstallationen', phone: '070-561 35 95', priority: 'B' },
+      { id: 'varmland-h019', name: 'Elcenter AB', category: 'renovation', specialty: 'Elektro / PV / Sicherheit', town: 'Karlstad / Värmland', services: 'Elektro, Wallbox, PV, Alarm/Sicherheit', phone: '054-771 87 00', priority: 'B' },
+      { id: 'varmland-h020', name: 'Alavaara El HB', category: 'renovation', specialty: 'Elektro / Bau', town: 'Deje / Forshaga', services: 'Elektro, Bad, Schreiner, Bau, Küche, Garage, Solar', phone: '070-294 04 90', priority: 'B' },
+      { id: 'varmland-h021', name: 'VVS Design Niclas Johannesson AB', category: 'renovation', specialty: 'VVS / Bad / Heizung', town: 'Karlstad / Värmland', services: 'VVS, Bad, Heizung, Pumpen, Wärmepumpen', phone: '054-51 09 09', priority: 'B' },
+      { id: 'varmland-h022', name: 'Effektiv VVS Norden AB', category: 'renovation', specialty: 'VVS / Bad / Heizung', town: 'Karlstad / ganz Värmland', services: 'VVS, Wärme, Sanitär, Bad', phone: '070-254 23 18', priority: 'B' },
+      { id: 'varmland-h023', name: 'Janne Carlson Rör AB', category: 'renovation', specialty: 'VVS / Wärmepumpe', town: 'Vålberg / Karlstad / Värmland', services: 'VVS, Wärmepumpen, Sanitär, Heizung', phone: '054-54 71 80', priority: 'B' },
+      { id: 'varmland-h024', name: 'Hammarö Rörinstallationer AB', category: 'renovation', specialty: 'VVS / Bad / Wärmepumpe', town: 'Skoghall / Hammarö', services: 'VVS, Bad, Wärmepumpen, Fußbodenheizung', phone: '054-51 99 54', priority: 'B' },
+      { id: 'varmland-h025', name: 'Karlstads Rörmontage', category: 'renovation', specialty: 'VVS / Wärmepumpe', town: 'Karlstad / Filipstad / Arvika / Värmland', services: 'VVS, Wärmepumpen, Bad, Technikräume', website: 'https://karlstadsrormontage.se/', priority: 'B' },
+      { id: 'varmland-h026', name: 'Värme & Sanitet i Grums AB', category: 'renovation', specialty: 'VVS / Heizung', town: 'Grums / Värmland', services: 'VVS, Bergwärme, Luft/Wasser-Wärmepumpen', phone: '0555-100 96', priority: 'B' },
+      { id: 'varmland-h027', name: 'Ulvsby Rör AB', category: 'renovation', specialty: 'VVS / Wärmepumpe', town: 'Karlstad / Värmland', services: 'VVS, Heizung, Wärmepumpen', phone: '070-285 77 01', priority: 'B' },
+      { id: 'varmland-h028', name: 'Klimatteknik Solsta AB', category: 'renovation', specialty: 'Wärmepumpe / Klima', town: 'Karlstad / Värmland', services: 'Luft-Luft, Luft-Wasser, Heiz-/Kühltechnik', phone: '054-18 20 07', priority: 'B' },
+      { id: 'varmland-h029', name: 'Svealands Tak i Värmland AB', category: 'renovation', specialty: 'Dach', town: 'Karlstad / Värmland', services: 'Dachneubau, Dachsanierung, Reparatur', phone: '054-53 36 00', priority: 'B' },
+      { id: 'varmland-h030', name: 'BMR Värmland AB', category: 'renovation', specialty: 'Dach / Fassade / Bau', town: 'Grums / Karlstad / Säffle / Värmland', services: 'Dach, Fassade, Terrasse, Garage/Carport, Bad-Totalunternehmer', phone: '076-392 84 08', website: 'https://www.bmrvarmland.se/', priority: 'B' },
+      { id: 'varmland-h031', name: 'Nordisk Serviceteknik', category: 'renovation', specialty: 'Bau / Snickeri / Service', town: 'Värmland', services: 'Renovierung, Fassade, Terrasse, Fenster/Türen, Küche/Bad', phone: '072-204 84 22', email: 'info@nordiskserviceteknik.se', website: 'https://nordiskserviceteknik.se/', priority: 'B' },
+      { id: 'varmland-h032', name: 'Nicke Snickare i Värmland AB', category: 'renovation', specialty: 'Bau / Schreiner', town: 'Karlstad / Värmland', services: 'Renovierung, Finschreinerei, Umbau, Neubau, Totalentreprise', phone: '054-56 05 00', priority: 'B' },
+      { id: 'varmland-h033', name: 'Wall Done AB', category: 'renovation', specialty: 'Bau / Renovierung', town: 'Karlstad', services: 'Renovierung, Umbau, Schreinerarbeiten', phone: '076-329 00 11', priority: 'B' },
+      { id: 'varmland-h034', name: 'Daniel L Bygg AB', category: 'renovation', specialty: 'Bau / Schreiner', town: 'Karlstad / Värmland', services: 'Bau- und Schreinerarbeiten', phone: '076-058 55 91', priority: 'B' },
+      { id: 'varmland-h035', name: 'Byggtjänst Hammarö AB', category: 'renovation', specialty: 'Bau', town: 'Skoghall / Hammarö', services: 'Bau und Renovierung', phone: '072-006 85 30', priority: 'B' },
+      { id: 'varmland-h036', name: 'Ljungvalls Byggnadsfirma AB', category: 'renovation', specialty: 'Bau / Totalentreprise', town: 'Värmland', services: 'Bau, Terrassen, Wintergärten, Neubau, Totalentreprise', website: 'https://www.ljungvallsbyggnadsfirma.se/', priority: 'B' },
+      { id: 'varmland-h037', name: 'Villagatans Markentreprenad', category: 'renovation', specialty: 'Erdarbeiten / Grundstück', town: 'Karlstad / ganz Värmland', services: 'Fundamente, Grundstücksplanung, Gartenanlagen, Kleinkläranlagen, Erdarbeiten', phone: '072-520 06 67', website: 'https://www.vgme.se/', priority: 'B' },
+      { id: 'varmland-h038', name: 'Solstadens Kakel AB', category: 'renovation', specialty: 'Bad / Fliesen', town: 'Karlstad / Värmland', services: 'Fliesen, Badrenovierung, Maurer-/Bauarbeiten', phone: '070-492 07 15', priority: 'B' },
+      { id: 'varmland-h039', name: 'Carlstad Plattsättning AB', category: 'renovation', specialty: 'Bad / Fliesen', town: 'Hammarö / Karlstad', services: 'Fliesen, Nassräume, Badrenovierung', priority: 'B' },
+      { id: 'varmland-h040', name: 'Grundels Fönstersystem AB', category: 'renovation', specialty: 'Fenster', town: 'Karlstad / Värmland', services: 'Fenstersysteme, Aufmaß, Montage, Qualitätskontrolle', phone: '054-18 05 01', priority: 'B' },
+      { id: 'varmland-h041', name: 'Skåre bygg och måleri', category: 'renovation', specialty: 'Bau / Maler', town: 'Karlstad', services: 'Schreinerei, Bad, Malerarbeiten', phone: '070-435 98 80', priority: 'B' },
+      { id: 'varmland-h042', name: 'RCTM', category: 'renovation', specialty: 'Bau / Dach / Maler / Boden', town: 'Värmland', services: 'Bau, Dach, Boden, Fassade, Malerarbeiten', website: 'https://rctm.se/', priority: 'B' }
+    ];
+    const varmlandDistanceByLocality = [
+      ['kristinehamn', 80], ['filipstad', 78], ['säffle', 74], ['arvika', 60],
+      ['skillingsfors', 45], ['stöllet', 60], ['torsby', 40], ['skoghall', 63],
+      ['hammarö', 63], ['karlstad', 54], ['forshaga', 48], ['deje', 43],
+      ['vålberg', 55], ['grums', 50], ['kil', 35], ['värmland', 65]
+    ];
+    databasePartners.forEach((provider) => {
+      const location = provider.town.toLocaleLowerCase('sv');
+      const coveredDistances = varmlandDistanceByLocality
+        .filter(([locality]) => location.includes(locality))
+        .map(([, distance]) => distance);
+      const distance = coveredDistances.length ? Math.min(...coveredDistances) : 65;
+      const initials = provider.name.split(/\s+/).slice(0, 2).map((word) => word[0]).join('').toLocaleUpperCase('sv');
+      providers.push({ ...provider, initials, distances: { sunne: distance } });
+    });
+    providers.find((provider) => provider.id === 'nortivo').priority = 'A';
+    function providerContactLinks(provider) {
+      const links = [];
+      if (provider.phone) {
+        const telephone = provider.phone.replace(/[^\d+]/g, '');
+        links.push(`<a class="provider-source" href="tel:${encodeURIComponent(telephone)}">Tel. ${escapeHtml(provider.phone)}</a>`);
+      }
+      if (provider.email) {
+        links.push(`<a class="provider-source" href="mailto:${encodeURIComponent(provider.email)}">E-Mail: ${escapeHtml(provider.email)}</a>`);
+      }
+      if (provider.website) {
+        links.push(`<a class="provider-source" href="${escapeHtml(provider.website)}" target="_blank" rel="noopener noreferrer">Website ↗</a>`);
+      }
+      return links.join('');
+    }
+    let servicePartnerAssignments = {};
+    try {
+      const savedAssignments = localStorage.getItem('stugliv-provider-assignments');
+      if (savedAssignments) {
+        const parsedAssignments = JSON.parse(savedAssignments);
+        if (!parsedAssignments || typeof parsedAssignments !== 'object' || Array.isArray(parsedAssignments)) {
+          throw new Error('Ungültige Servicepartner-Zuordnungen');
+        }
+        const providerIds = new Set(providers.map((provider) => provider.id));
+        servicePartnerAssignments = Object.fromEntries(Object.entries(parsedAssignments)
+          .filter(([, ids]) => Array.isArray(ids))
+          .map(([propertyId, ids]) => [propertyId, Array.from(new Set(ids.filter((id) => providerIds.has(id))))]));
+      }
+    } catch (error) {
+      console.error('Servicepartner-Zuordnungen konnten nicht geladen werden:', error);
+    }
+    const costCategories = [
+      { id: 'propertyFee', label: 'Kommunale Immobilienabgabe', note: 'Planwert: 2026 bis max. 10 425 kr; tatsächlich 0,75 % des Steuerwerts bis zum Höchstbetrag.', amount: 10425 },
+      { id: 'insurance', label: 'Ferienhausversicherung', note: 'Individueller Versicherungsbeitrag laut Angebot / aktueller Police.', amount: 6000 },
+      { id: 'energy', label: 'Strom & Heizung', note: 'Stromvertrag, Netzgebühr, Verbrauch und ggf. weitere Heizenergie.', amount: 14000 },
+      { id: 'water', label: 'Wasser, Abwasser & Abfall', note: 'Gemeindetarif oder Brunnen/Abwasseranlage; abhängig vom Standort.', amount: 9000 },
+      { id: 'fire', label: 'Kamin, Schornstein & Brandschutz', note: 'Kehren, vorgeschriebene Kontrollen und kleinere Sicherheitsartikel.', amount: 2500 },
+      { id: 'cleaning', label: 'Reinigung & Gästewechsel', note: 'Turnover-Reinigung, Wäsche und Verbrauchsmaterial.', amount: 12000 },
+      { id: 'inspection', label: 'Hauskontrollen bei Abwesenheit', note: 'Planwert für regelmäßige Vor-Ort-Besuche; Angebot des lokalen Anbieters eintragen.', amount: 6000 },
+      { id: 'grounds', label: 'Schnee, Garten & Außenbereich', note: 'Räumung, Rasen, Wege und saisonale Arbeiten.', amount: 8000 },
+      { id: 'maintenance', label: 'Wartung & Reparaturrücklage', note: 'Individuelle Rücklage für Zustand und geplante Erneuerungen.', amount: 15000 }
+    ];
+    const initialCosts = Object.fromEntries(properties.map((property) => [property.id, Object.fromEntries(costCategories.map((category) => [category.id, category.amount]))]));
+    const absenceChecklist = [
+      { id: 'outside', title: 'Außenbereich und Gebäudehülle', detail: 'Sichtprüfung von Dach, Dachrinnen, Fassade, Fenstern, Türen und Terrasse auf Sturm- oder Frostschäden.' },
+      { id: 'water', title: 'Wasserleitungen und Feuchtigkeit', detail: 'Auf sichtbare Lecks, feuchte Stellen, ungewöhnliche Gerüche und stehendes Wasser prüfen; Frostschutz gemäß Eigentümer-Anweisung kontrollieren.' },
+      { id: 'heating', title: 'Heizung und Frostschutz', detail: 'Raumtemperatur/Heizung nach vereinbartem Sollwert prüfen; keine Einstellungen außerhalb der Eigentümer-Anweisung ändern.' },
+      { id: 'electricity', title: 'Strom und Geräte (Sichtkontrolle)', detail: 'Auf ausgelöste Sicherungen, ungewöhnliche Geräusche oder sichtbare Schäden achten; keine Elektroarbeiten durchführen.' },
+      { id: 'fire', title: 'Brandschutz', detail: 'Rauchmelder-Anzeige, Feuerlöscher/Löschdecke und freien Zugang kontrollieren; Kamin/Ofen nur nach vereinbartem Prüfplan.' },
+      { id: 'pests', title: 'Schädlinge und Gerüche', detail: 'Auf Spuren von Nagern/Insekten, ungewöhnlichen Geruch und offene Lebensmittel achten.' },
+      { id: 'security', title: 'Türen, Fenster und Schlüssel', detail: 'Alle Zugänge auf sicheren Verschluss prüfen; Schlüssel und Alarmanlage nach dem vereinbarten Verfahren behandeln.' },
+      { id: 'weather', title: 'Wetter, Schnee und Entwässerung', detail: 'Zugang, Wege, Abflüsse und sichtbare Schneelast nach örtlichen Bedingungen prüfen; Gefahren nicht selbst betreten.' },
+      { id: 'mail', title: 'Post und Grundstück', detail: 'Briefkasten leeren, Mülltermine beachten und Außenbereich auf offensichtliche Schäden oder unbefugten Zutritt prüfen.' },
+      { id: 'report', title: 'Dokumentation und Rückmeldung', detail: 'Datum, Zählerstände nach Vereinbarung, Auffälligkeiten und Fotos dokumentieren; dringende Schäden sofort melden.' }
+    ];
+    const winterChecklist = [
+      { id: 'heating', title: 'Heizung und Frostschutz einstellen', detail: 'Funktion und vereinbarte Mindesttemperatur prüfen. Einstellungen nur nach Eigentümer-Anweisung vornehmen.' },
+      { id: 'water', title: 'Wasserleitungen und Außenhähne frostsicher machen', detail: 'Gartenschläuche abnehmen und Außenhähne nach Hausroutine sichern. Wasserzufuhr oder Leitungen nur gemäß objektspezifischer Anleitung entleeren bzw. absperren.' },
+      { id: 'meter', title: 'Wasserzähler und gefährdete Leitungen prüfen', detail: 'Lage und Frostschutz von Wasserzähler, Leitungen in kalten Räumen und Pumpen kontrollieren; bei Unsicherheit Installationsbetrieb beauftragen.' },
+      { id: 'gutters', title: 'Dachrinnen und Abläufe kontrollieren', detail: 'Laub und sichtbare Hindernisse vom sicheren Standort aus prüfen. Arbeiten auf Dach oder Leiter einer Fachkraft überlassen.' },
+      { id: 'building', title: 'Fenster, Türen und Gebäudehülle prüfen', detail: 'Fenster und Türen schließen, Dichtungen sowie sichtbare Schäden an Fassade und Dach dokumentieren.' },
+      { id: 'chimney', title: 'Kamin und Schornstein fachgerecht prüfen lassen', detail: 'Kehr- und Prüftermin mit dem zuständigen Schornsteinfeger abstimmen; Kamin nicht bei ungeklärten Mängeln nutzen.' },
+      { id: 'fire', title: 'Rauchmelder und Brandschutz prüfen', detail: 'Rauchmelder nach Herstellerhinweisen testen und Feuerlöscher/Löschdecke auf Vorhandensein und Zugänglichkeit prüfen.' },
+      { id: 'outdoor', title: 'Gartenmöbel und Außenausstattung sichern', detail: 'Möbel, Grill, Werkzeuge und lose Gegenstände reinigen, einlagern oder windsicher befestigen.' },
+      { id: 'snow', title: 'Schnee- und Zugangsservice organisieren', detail: 'Zuständigkeit für Schneeräumung, Zufahrt und sichere Wege vor dem ersten Schneefall klären. Dachschnee nur durch Fachkräfte entfernen lassen.' },
+      { id: 'security', title: 'Abwesenheit und Notfallkontakte vorbereiten', detail: 'Türen und Fenster sichern, vereinbarte Kontrollgänge planen und lokale Notfall- sowie Servicekontakte aktuell hinterlegen.' },
+      { id: 'documentation', title: 'Winterzustand dokumentieren', detail: 'Abschlussdatum, Zählerstände nach Vereinbarung und Auffälligkeiten notieren; Fotos für Eigentümer oder Servicepartner aufnehmen.' }
+    ];
+    let annualCosts = initialCosts;
+    try {
+      const savedCosts = localStorage.getItem('stugliv-costs');
+      if (savedCosts) annualCosts = { ...initialCosts, ...JSON.parse(savedCosts) };
+    } catch (error) {
+      console.error('Jahreskosten konnten nicht geladen werden:', error);
+      annualCosts = initialCosts;
+    }
+    let inspectionChecks = {};
+    let inspectionLog = {};
+    let inspectionSelections = {};
+    let inspectionCadence = {};
+    let winterChecks = {};
+    try {
+      inspectionChecks = JSON.parse(localStorage.getItem('stugliv-inspection-checks') || '{}');
+      inspectionLog = JSON.parse(localStorage.getItem('stugliv-inspection-log') || '{}');
+      inspectionSelections = JSON.parse(localStorage.getItem('stugliv-inspection-selections') || '{}');
+      inspectionCadence = JSON.parse(localStorage.getItem('stugliv-inspection-cadence') || '{}');
+      winterChecks = JSON.parse(localStorage.getItem('stugliv-winter-checklist') || '{}');
+      if (!inspectionChecks || typeof inspectionChecks !== 'object' || Array.isArray(inspectionChecks)) throw new Error('Ungültige Prüfliste');
+      if (!inspectionLog || typeof inspectionLog !== 'object' || Array.isArray(inspectionLog)) throw new Error('Ungültiges Kontrollprotokoll');
+      if (!inspectionSelections || typeof inspectionSelections !== 'object' || Array.isArray(inspectionSelections)) throw new Error('Ungültige Auswahl der Prüfpunkte');
+      if (!inspectionCadence || typeof inspectionCadence !== 'object' || Array.isArray(inspectionCadence)) throw new Error('Ungültige Kontrolltaktung');
+      if (!winterChecks || typeof winterChecks !== 'object' || Array.isArray(winterChecks)) throw new Error('Ungültige Winter-Checkliste');
+    } catch (error) {
+      console.error('Hauskontroll-Daten konnten nicht geladen werden:', error);
+      inspectionChecks = {};
+      inspectionLog = {};
+      inspectionSelections = {};
+      inspectionCadence = {};
+      winterChecks = {};
+    }
+    let tasks;
+    try {
+      const saved = localStorage.getItem('stugliv-tasks');
+      tasks = saved ? JSON.parse(saved) : initialTasks;
+      if (!Array.isArray(tasks)) throw new Error('Ungültige Aufgabenliste');
+    } catch (error) {
+      console.error('Aufgaben konnten nicht geladen werden:', error);
+      tasks = initialTasks;
+    }
+    let currentPage = 'dashboard';
+    let profileData = { name: 'Max Mustermann', username: 'max.mustermann', email: '' };
+    try {
+      const savedProfile = localStorage.getItem('stugliv-profile');
+      if (savedProfile) profileData = { ...profileData, ...JSON.parse(savedProfile) };
+    } catch (error) {
+      console.error('Profil konnte nicht geladen werden:', error);
+    }
+    let taskFilter = 'all';
+    let searchTerm = '';
+    let providerProperty = properties[0].id;
+    let providerCategory = 'all';
+    let providerSearch = '';
+    let providerRadius = 100;
+    let costProperty = properties[0].id;
+    let inspectionProperty = properties[0].id;
+    let inspectionView = 'absence';
+    const firstCalendarEventDate = guestChanges[0].date;
+    let calendarMonth = new Date(Number(firstCalendarEventDate.slice(0, 4)), Number(firstCalendarEventDate.slice(5, 7)) - 1, 1);
+    let calendarSelectedDate = firstCalendarEventDate;
+    let calendarView = 'month';
+    let editingPropertyId = null;
+    let onlyFavorites = false;
+    let favorites = [];
+    try {
+      const savedFavorites = localStorage.getItem('stugliv-favorites');
+      favorites = savedFavorites ? JSON.parse(savedFavorites) : [];
+      if (!Array.isArray(favorites)) throw new Error('Ungültige Favoritenliste');
+    } catch (error) {
+      console.error('Favoriten konnten nicht geladen werden:', error);
+      favorites = [];
+    }
+    const pageContent = document.getElementById('page-content');
+    const fmtDate = (date) => new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: 'short' }).format(new Date(`${date}T12:00:00`)).replace('.', '');
+    const fmtLongDate = () => new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+    const activeGuestChanges = () => guestChanges.filter((event) => properties.some((property) => property.id === event.property || property.name === event.property));
+    let editingTaskId = null;
+    const openTaskModal = () => {
+      editingTaskId = null;
+      const form = document.getElementById('task-form');
+      form.reset();
+      const dateInput = document.querySelector('[name="date"]');
+      dateInput.value = localDateKey(new Date());
+      const propertySelect = document.querySelector('#task-form [name="property"]');
+      propertySelect.innerHTML = `${properties.map((property) => `<option>${escapeHtml(property.name)}</option>`).join('')}<option>Alle Ferienhäuser</option>`;
+      document.getElementById('modal-title').textContent = 'Aufgabe erstellen';
+      form.querySelector('[type="submit"]').textContent = 'Aufgabe speichern';
+      document.getElementById('task-modal').classList.add('open');
+      document.querySelector('[name="title"]').focus();
+    };
+    const openTaskEditor = (task) => {
+      editingTaskId = task.id;
+      const form = document.getElementById('task-form');
+      const propertySelect = form.elements.property;
+      const propertiesOptions = properties.map((property) => `<option>${escapeHtml(property.name)}</option>`);
+      if (task.property && !properties.some((property) => property.name === task.property) && task.property !== 'Alle Ferienhäuser') {
+        propertiesOptions.push(`<option>${escapeHtml(task.property)}</option>`);
+      }
+      propertySelect.innerHTML = `${propertiesOptions.join('')}<option>Alle Ferienhäuser</option>`;
+      form.elements.title.value = task.title;
+      form.elements.property.value = task.property;
+      form.elements.date.value = task.date || '';
+      form.elements.priority.value = task.priority || 'normal';
+      document.getElementById('modal-title').textContent = 'Aufgabe bearbeiten';
+      form.querySelector('[type="submit"]').textContent = 'Änderungen speichern';
+      document.getElementById('task-modal').classList.add('open');
+      form.elements.title.focus();
+    };
+    const closeTaskModal = () => {
+      document.getElementById('task-modal').classList.remove('open');
+      editingTaskId = null;
+    };
+    const initialsFor = (name) => name.trim().split(/\s+/).slice(0, 2).map((part) => part[0] || '').join('').toLocaleUpperCase('de');
+    function updateProfileSummary() {
+      document.querySelectorAll('.nav [data-page="profile"]').forEach((button) => {
+        button.setAttribute('aria-label', `Benutzer: ${profileData.name}`);
+      });
+    }
+    function compressPropertyPhoto(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Bilddatei konnte nicht gelesen werden.'));
+        reader.onload = () => {
+          const image = new Image();
+          image.onerror = () => reject(new Error('Die ausgewählte Datei ist kein lesbares Bild.'));
+          image.onload = () => {
+            const maxEdge = 1200;
+            const scale = Math.min(1, maxEdge / Math.max(image.naturalWidth, image.naturalHeight));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(image.naturalWidth * scale);
+            canvas.height = Math.round(image.naturalHeight * scale);
+            canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.78));
+          };
+          image.src = String(reader.result);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    let pendingPropertyPhoto = '';
+    function saveProperties() {
+      try {
+        localStorage.setItem('stugliv-properties', JSON.stringify(properties));
+        return true;
+      } catch (error) {
+        console.error('Ferienhäuser konnten nicht gespeichert werden:', error);
+        showToast('Ferienhaus konnte nicht gespeichert werden. Browser-Speicher prüfen.');
+        return false;
+      }
+    }
+    function removeProperty(propertyId) {
+      const property = properties.find((item) => item.id === propertyId);
+      if (!property) return false;
+      if (properties.length <= 1) {
+        showToast('Das letzte Ferienhaus kann nicht entfernt werden.');
+        return false;
+      }
+      const nextProperties = properties.filter((item) => item.id !== propertyId);
+      const nextTasks = tasks.filter((task) => task.property !== property.name && task.property !== property.id && task.propertyId !== propertyId);
+      const withoutProperty = (record) => Object.fromEntries(Object.entries(record).filter(([id]) => id !== propertyId));
+      const nextCosts = withoutProperty(annualCosts);
+      const nextInspectionChecks = withoutProperty(inspectionChecks);
+      const nextInspectionLog = withoutProperty(inspectionLog);
+      const nextInspectionSelections = withoutProperty(inspectionSelections);
+      const nextInspectionCadence = withoutProperty(inspectionCadence);
+      const nextServicePartnerAssignments = withoutProperty(servicePartnerAssignments);
+      const updates = {
+        'stugliv-properties': nextProperties,
+        'stugliv-tasks': nextTasks,
+        'stugliv-costs': nextCosts,
+        'stugliv-inspection-checks': nextInspectionChecks,
+        'stugliv-inspection-log': nextInspectionLog,
+        'stugliv-inspection-selections': nextInspectionSelections,
+        'stugliv-inspection-cadence': nextInspectionCadence,
+        'stugliv-provider-assignments': nextServicePartnerAssignments
+      };
+      const previousValues = Object.fromEntries(Object.keys(updates).map((key) => [key, localStorage.getItem(key)]));
+      try {
+        for (const [key, value] of Object.entries(updates)) localStorage.setItem(key, JSON.stringify(value));
+      } catch (error) {
+        console.error('Ferienhausdaten konnten nicht vollständig entfernt werden:', error);
+        for (const [key, value] of Object.entries(previousValues)) {
+          try {
+            if (value === null) localStorage.removeItem(key);
+            else localStorage.setItem(key, value);
+          } catch (rollbackError) {
+            console.error(`Wiederherstellung von ${key} fehlgeschlagen:`, rollbackError);
+          }
+        }
+        showToast('Haus konnte nicht vollständig entfernt werden. Browser-Speicher prüfen.');
+        return false;
+      }
+      properties = nextProperties;
+      tasks = nextTasks;
+      annualCosts = nextCosts;
+      inspectionChecks = nextInspectionChecks;
+      inspectionLog = nextInspectionLog;
+      inspectionSelections = nextInspectionSelections;
+      inspectionCadence = nextInspectionCadence;
+      servicePartnerAssignments = nextServicePartnerAssignments;
+      providerProperty = properties[0].id;
+      costProperty = properties[0].id;
+      inspectionProperty = properties[0].id;
+      currentPage = 'properties';
+      render();
+      showToast(`${property.name} wurde entfernt.`);
+      return true;
+    }
+    function openPropertyModal(property = null) {
+      editingPropertyId = property?.id || null;
+      const form = document.getElementById('property-form');
+      form.reset();
+      document.getElementById('property-modal-title').textContent = property ? 'Ferienhaus bearbeiten' : 'Ferienhaus hinzufügen';
+      form.elements.name.value = property?.name || '';
+      form.elements.address.value = property?.address || '';
+      form.elements.region.value = property?.region || '';
+      form.elements.yearBuilt.value = property?.yearBuilt || '';
+      form.elements.livingArea.value = property?.livingArea || '';
+      form.elements.plotSize.value = property?.plotSize || '';
+      form.elements.rooms.value = property?.rooms || '';
+      form.elements.beds.value = Number.parseInt(property?.beds, 10) || '';
+      form.elements.heatingSystem.value = property?.heatingSystem || '';
+      form.elements.heatingYear.value = property?.heatingYear || '';
+      form.elements.fireplace.value = property?.fireplace || '';
+      form.elements.fireplaceType.value = property?.fireplaceType || '';
+      form.elements.fireplaceInspection.value = property?.fireplaceInspection || '';
+      form.elements.fireplaceNotes.value = property?.fireplaceNotes || '';
+      form.elements.condition.value = property?.condition || '';
+      form.elements.lastRenovations.value = property?.lastRenovations || '';
+      form.elements.plannedRenovations.value = property?.plannedRenovations || '';
+      form.elements.photo.value = '';
+      form.elements.heatingSystem.value = property?.heatingSystem || '';
+      form.elements.heatingYear.value = property?.heatingYear || '';
+      form.elements.fireplace.value = property?.fireplace || '';
+      form.elements.fireplaceType.value = property?.fireplaceType || '';
+      form.elements.fireplaceInspection.value = property?.fireplaceInspection || '';
+      form.elements.fireplaceNotes.value = property?.fireplaceNotes || '';
+      const preview = document.getElementById('property-photo-preview');
+      preview.src = property?.photo || '';
+      preview.classList.toggle('visible', Boolean(property?.photo));
+      document.getElementById('remove-property-photo').style.display = property?.photo ? 'inline' : 'none';
+      pendingPropertyPhoto = property?.photo || '';
+      document.getElementById('property-modal').classList.add('open');
+      form.elements.name.focus();
+    }
+    function closePropertyModal() {
+      document.getElementById('property-modal').classList.remove('open');
+      editingPropertyId = null;
+    }
+    function propertySummary(property) {
+      const details = [
+        property.yearBuilt && `Baujahr ${property.yearBuilt}`,
+        property.livingArea && `${property.livingArea} m² Wohnfläche`,
+        property.plotSize && `${property.plotSize} m² Grundstück`,
+        property.rooms && `${property.rooms} Zimmer`,
+        property.condition && `Zustand: ${property.condition}`
+      ].filter(Boolean);
+      return details.length ? details.join(' · ') : 'Gebäudedaten ergänzen';
+    }
+    function persistTasks() {
+      try {
+        localStorage.setItem('stugliv-tasks', JSON.stringify(tasks));
+        return true;
+      } catch (error) {
+        console.error('Aufgaben konnten nicht gespeichert werden:', error);
+        showToast('Speichern nicht möglich. Bitte Browser-Speicher prüfen.');
+        return false;
+      }
+    }
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+    function taskRow(task) {
+      const priority = task.priority === 'urgent' ? 'Dringend' : task.priority === 'soon' ? 'Wichtig' : 'Aufgabe';
+      const tagClass = task.priority === 'urgent' ? 'urgent' : task.priority === 'soon' ? 'soon' : '';
+      return `<div class="task-row" data-edit-task="${task.id}">
+        <button class="check ${task.done ? 'done' : ''}" data-toggle="${task.id}" aria-label="${task.done ? 'Als offen markieren' : 'Als erledigt markieren'}">${task.done ? icon('check') : ''}</button>
+        <div class="task-main"><button class="task-name ${task.done ? 'completed' : ''}" type="button" data-edit-task="${task.id}" aria-label="Aufgabe bearbeiten: ${escapeHtml(task.title)}">${escapeHtml(task.title)}</button><div class="task-meta"><span>${escapeHtml(task.property)}</span><span class="task-tag ${tagClass}">${priority}</span></div></div>
+        <div class="task-due">${fmtDate(task.date)}</div>
+      </div>`;
+    }
+    function renderNotifications() {
+      const panel = document.getElementById('notification-panel');
+      const openTasks = tasks.filter((task) => !task.done);
+      const priority = { urgent: 0, soon: 1, normal: 2 };
+      const today = localDateKey(new Date());
+      const mostUrgent = [...openTasks].sort((a, b) => {
+        const priorityDifference = (priority[a.priority] ?? 2) - (priority[b.priority] ?? 2);
+        if (priorityDifference) return priorityDifference;
+        const dateA = a.date || '9999-12-31';
+        const dateB = b.date || '9999-12-31';
+        const overdueDifference = Number(dateA > today) - Number(dateB > today);
+        return overdueDifference || dateA.localeCompare(dateB);
+      }).slice(0, 3);
+      const urgentCount = openTasks.filter((task) => task.priority === 'urgent').length;
+      document.querySelector('#notify-button .dot').hidden = openTasks.length === 0;
+      panel.innerHTML = `<div class="notification-head"><div><strong>Dringendste Aufgaben</strong><small>${openTasks.length ? `${openTasks.length} offene Aufgaben · nach Priorität sortiert` : 'Alle Aufgaben sind erledigt.'}</small></div>${urgentCount ? `<span class="notification-count">${urgentCount} dringend</span>` : ''}</div>
+        <div class="notification-list">${mostUrgent.length ? mostUrgent.map(taskRow).join('') : '<div class="empty">Keine offenen Aufgaben.</div>'}</div>
+        ${openTasks.length ? '<div class="notification-footer"><button class="text-btn" data-page="tasks">Alle Aufgaben ansehen →</button></div>' : ''}`;
+    }
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+    }
+    function dashboard() {
+      const open = tasks.filter((task) => !task.done);
+      const upcomingChanges = activeGuestChanges();
+      const currentInspections = properties.filter((property) => inspectionIsCurrent(property.id)).length;
+      const firstName = profileData.name.trim().split(/\s+/)[0] || 'Willkommen';
+      return `<div class="welcome"><div><p class="eyebrow">Husora · Dein Schweden-Portfolio · ${fmtLongDate()}</p><h1>Guten Tag, ${escapeHtml(firstName)} <span aria-hidden="true">☀️</span></h1><p class="subtitle">Gästewechsel, Stugapflege und Serviceeinsätze für deine Ferienhäuser.</p></div><button class="primary-btn" data-action="new-task">${icon('plus')} Aufgabe planen</button></div>
+        <section class="stats" aria-label="Kennzahlen">
+          <button class="stat" data-page="properties"><img class="stat-art" src="assets/ferienhaus.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Ferienhäuser</span><span class="stat-icon">${icon('property')}</span></div><div class="stat-value">${String(properties.length).padStart(2, '0')}</div><div class="stat-note"><em>Värmland · Dalarna · Bohuslän</em></div></button>
+          <button class="stat" data-page="tasks"><img class="stat-art" src="assets/hausservice.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Offene Serviceaufgaben</span><span class="stat-icon amber">${icon('task')}</span></div><div class="stat-value">${String(open.length).padStart(2, '0')}</div><div class="stat-note"><em>${open.filter((task) => task.priority === 'urgent').length} dringend</em> vor dem nächsten Gästewechsel</div></button>
+          <button class="stat" data-page="calendar"><img class="stat-art" src="assets/gaestewechsel.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Gästewechsel diese Woche</span><span class="stat-icon">${icon('calendar')}</span></div><div class="stat-value">${String(upcomingChanges.length).padStart(2, '0')}</div><div class="stat-note">Nächster Check-in <em>im Kalender</em></div></button>
+          <button class="stat" data-page="inspections"><img class="stat-art" src="assets/hauskontrolle.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Hausservice · Prüfstatus</span><span class="stat-icon">${icon('inspection')}</span></div><div class="stat-value">${currentInspections}/${properties.length}</div><div class="stat-note"><em>${currentInspections === properties.length ? 'Alle Kontrollen aktuell' : `${properties.length - currentInspections} Prüfung${properties.length - currentInspections === 1 ? '' : 'en'} offen`}</em></div></button>
+        </section>
+        <div class="columns">
+          <section class="card"><div class="card-head"><div><h2 class="card-title">Service vor Ort</h2><p class="card-caption">${open.length} offene Aufgaben an deinen schwedischen Ferienhäusern</p></div><button class="text-btn" data-page="tasks">Alle Aufgaben →</button></div><div class="task-list">${open.length ? open.slice(0, 4).map(taskRow).join('') : '<div class="empty">Alles erledigt — großartig!</div>'}</div></section>
+          <div>
+            <section class="card"><div class="card-head"><div><h2 class="card-title">Nächste Gästewechsel</h2><p class="card-caption">Anreise, Endreinigung und Schlüssel</p></div><button class="text-btn" data-page="calendar">Kalender →</button></div>
+              ${upcomingChanges.length ? upcomingChanges.map((event) => `<div class="appointment"><div class="date-tile"><b>${fmtDate(event.date).split(' ')[0]}</b><small>${fmtDate(event.date).split(' ')[1]}</small></div><div class="appointment-info"><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(event.detail)} · ${escapeHtml(event.time)}</small></div></div>`).join('') : '<div class="empty">Für deine Ferienhäuser sind keine Gästewechsel eingetragen.</div>'}
+            </section>
+            <section class="card"><div class="card-head"><div><h2 class="card-title">Hausservice-Übersicht</h2><p class="card-caption">Prüfstatus und zugeordnete Servicepartner je Ferienhaus</p></div><button class="text-btn" data-page="inspections">Hauskontrolle →</button></div>
+              <div class="house-service-list">${properties.map((property) => {
+                const assigned = providers.filter((provider) => (servicePartnerAssignments[property.id] || []).includes(provider.id));
+                const partnerText = assigned.length ? assigned.map((provider) => provider.name).join(', ') : 'Noch keine Servicepartner zugeordnet';
+                return `<button class="house-service-row" data-action="open-inspection" data-property="${escapeHtml(property.id)}"><span class="house-service-name">${escapeHtml(property.name)}<small>${escapeHtml(property.region || property.address)}</small><small class="house-service-partners">${escapeHtml(partnerText)}</small></span>${inspectionStatusBadge(property.id)}</button>`;
+              }).join('') || '<div class="empty">Noch keine Ferienhäuser vorhanden.</div>'}</div>
+            </section>
+          </div>
+        </div>`;
+    }
+    function calendarEvents() {
+      return [
+        ...activeGuestChanges(),
+        ...tasks.filter((task) => task.date).map((task) => ({
+          id: `task-${task.id}`,
+          taskId: task.id,
+          title: task.title,
+          property: task.property,
+          date: task.date,
+          time: '',
+          detail: task.done ? 'Erledigt' : task.priority === 'urgent' ? 'Dringend' : 'Serviceaufgabe',
+          type: 'task'
+        }))
+      ];
+    }
+    function calendarPage() {
+      const year = calendarMonth.getFullYear();
+      const month = calendarMonth.getMonth();
+      const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+      const selectedDate = new Date(`${calendarSelectedDate}T12:00:00`);
+      const weekStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 12);
+      weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+      const weekEnd = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 6, 12);
+      const monthTitle = calendarView === 'week'
+        ? `${new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'short' }).format(weekStart)} – ${new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'short', year: 'numeric' }).format(weekEnd)}`
+        : new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' }).format(calendarMonth);
+      const today = new Date();
+      const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const events = calendarEvents();
+      const selectedEvents = events.filter((item) => item.date === calendarSelectedDate).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+      const weekdayLabels = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+      const cells = [];
+      const cellCount = calendarView === 'week' ? 7 : 42;
+      for (let index = 0; index < cellCount; index++) {
+        const dayDate = calendarView === 'week'
+          ? new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + index, 12)
+          : new Date(year, month, index - firstWeekday + 1);
+        const dateKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
+        const dayEvents = events.filter((item) => item.date === dateKey);
+        const maxVisible = calendarView === 'week' ? 5 : 2;
+        const eventChips = dayEvents.slice(0, maxVisible).map((item) => {
+          const label = `${escapeHtml(item.time ? `${item.time} ` : '')}${escapeHtml(item.title)}`;
+          return item.type === 'task'
+            ? `<button type="button" class="calendar-event-chip task" data-edit-task="${item.taskId}" aria-label="Aufgabe bearbeiten: ${escapeHtml(item.title)}">${label}</button>`
+            : `<span class="calendar-event-chip">${label}</span>`;
+        }).join('');
+        const moreEvents = dayEvents.length > maxVisible ? `<span class="calendar-event-chip">+${dayEvents.length - maxVisible} weitere</span>` : '';
+        cells.push(`<div class="calendar-day ${calendarView === 'month' && dayDate.getMonth() !== month ? 'outside' : ''} ${dateKey === calendarSelectedDate ? 'selected' : ''} ${dateKey === todayKey ? 'today' : ''}" data-calendar-date="${dateKey}"><button type="button" class="calendar-date-button" data-calendar-date="${dateKey}" aria-label="${escapeHtml(new Intl.DateTimeFormat('de-DE', { dateStyle: 'full' }).format(dayDate))}${dayEvents.length ? `, ${dayEvents.length} Termine` : ''}" aria-pressed="${dateKey === calendarSelectedDate}"><span class="calendar-day-number">${dayDate.getDate()}</span></button>${eventChips}${moreEvents}</div>`);
+      }
+      const selectedLabel = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${calendarSelectedDate}T12:00:00`));
+      return `<div class="welcome"><div><p class="eyebrow">Planung & Gästewechsel</p><h1>Kalender</h1><p class="subtitle">Gästewechsel und datierte Serviceaufgaben im Monatsüberblick.</p></div></div>
+        <section class="card"><div class="card-head"><h2 class="card-title">Termine</h2><div class="calendar-toolbar"><button class="calendar-nav" data-calendar-step="-1" aria-label="${calendarView === 'week' ? 'Vorherige Woche' : 'Vorheriger Monat'}">‹</button><strong>${escapeHtml(monthTitle)}</strong><button class="calendar-nav" data-calendar-step="1" aria-label="${calendarView === 'week' ? 'Nächste Woche' : 'Nächster Monat'}">›</button><div class="calendar-view-toggle" aria-label="Kalenderansicht"><button type="button" data-calendar-view="month" class="${calendarView === 'month' ? 'active' : ''}" aria-pressed="${calendarView === 'month'}">Monat</button><button type="button" data-calendar-view="week" class="${calendarView === 'week' ? 'active' : ''}" aria-pressed="${calendarView === 'week'}">Woche</button></div></div></div>
+          <div class="calendar-grid ${calendarView === 'week' ? 'calendar-week-view' : ''}">${weekdayLabels.map((label) => `<div class="calendar-weekday">${label}</div>`).join('')}${cells.join('')}</div>
+          <div class="calendar-legend"><span><i class="calendar-dot"></i>Gästewechsel</span><span><i class="calendar-dot task"></i>Serviceaufgabe</span></div>
+        </section>
+        <section class="card" style="margin-top:16px"><div class="card-head"><div><h2 class="card-title">${escapeHtml(selectedLabel)}</h2><p class="card-caption">${selectedEvents.length} ${selectedEvents.length === 1 ? 'Termin' : 'Termine'}</p></div><button class="text-btn" data-page="tasks">Aufgaben ansehen →</button></div>
+          ${selectedEvents.length ? selectedEvents.map((item) => {
+            const eventDetails = `<span class="calendar-event-time">${escapeHtml(item.time || (item.type === 'task' ? 'Aufgabe' : ''))}</span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.property)} · ${escapeHtml(item.detail)}</small></span>`;
+            return item.type === 'task'
+              ? `<button type="button" class="calendar-event" data-edit-task="${item.taskId}" aria-label="Aufgabe bearbeiten: ${escapeHtml(item.title)}">${eventDetails}</button>`
+              : `<div class="calendar-event">${eventDetails}</div>`;
+          }).join('') : '<div class="empty">Für diesen Tag sind keine Termine eingetragen.</div>'}
+        </section>`;
+    }
+    function profilePage() {
+      return `<div class="welcome"><div><p class="eyebrow">Persönliche Einstellungen</p><h1>Benutzer</h1><p class="subtitle">Verwalte die Angaben für dein Husora-Konto.</p></div></div>
+        <section class="card profile-form"><div class="profile-heading"><div class="profile-large-avatar">${escapeHtml(initialsFor(profileData.name))}</div><div><strong>${escapeHtml(profileData.name)}</strong><small>@${escapeHtml(profileData.username)}</small></div></div>
+          <form id="profile-form" style="padding-top:18px"><div class="profile-grid">
+            <label><span class="form-label">Name</span><input class="form-control" name="name" required maxlength="80" value="${escapeHtml(profileData.name)}"></label>
+            <label><span class="form-label">Username</span><input class="form-control" name="username" required maxlength="40" value="${escapeHtml(profileData.username)}"></label>
+            <label class="full"><span class="form-label">E-Mail</span><input class="form-control" name="email" type="email" maxlength="120" value="${escapeHtml(profileData.email)}"></label>
+            <label><span class="form-label">Neues Passwort</span><input class="form-control" type="password" autocomplete="new-password" placeholder="Sichere Anmeldung erforderlich" disabled></label>
+            <label><span class="form-label">Passwort wiederholen</span><input class="form-control" type="password" autocomplete="new-password" placeholder="Sichere Anmeldung erforderlich" disabled></label>
+          </div><div class="profile-notice">Diese App speichert ihre Daten nur lokal in diesem Browser. Ein Passwortwechsel ist ohne sicheren Authentifizierungsserver nicht verfügbar; Passwörter werden daher weder erfasst noch gespeichert.</div><div class="form-actions"><button type="submit" class="primary-btn">Profil speichern</button></div></form>
+        </section>`;
+    }
+    function tasksPage() {
+      const visible = tasks.filter((task) => {
+        const matchesFilter = taskFilter === 'all' || (taskFilter === 'open' ? !task.done : task.done);
+        const matchesSearch = `${task.title} ${task.property}`.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesFilter && matchesSearch;
+      }).sort((a, b) => a.date.localeCompare(b.date));
+      return `<div class="welcome"><div><p class="eyebrow">Gästewechsel & Instandhaltung</p><h1>Serviceaufgaben</h1><p class="subtitle">Koordiniere Reinigung, Schlüsselübergaben und saisonale Stugapflege.</p></div><button class="primary-btn" data-action="new-task">${icon('plus')} Aufgabe planen</button></div>
+        <section class="card"><div class="card-head"><div><h2 class="card-title">Alle Serviceaufgaben</h2><p class="card-caption">${tasks.filter((task) => !task.done).length} offen · ${tasks.filter((task) => task.done).length} erledigt</p></div></div>
+        <div class="section-toolbar" style="padding:0 18px"><label class="search">${icon('search')}<input id="task-search" type="search" placeholder="Aufgaben durchsuchen…" value="${escapeHtml(searchTerm)}"></label><div class="toolbar-right"><select id="task-filter" class="filter-select" aria-label="Aufgaben filtern"><option value="all" ${taskFilter === 'all' ? 'selected' : ''}>Alle Aufgaben</option><option value="open" ${taskFilter === 'open' ? 'selected' : ''}>Offen</option><option value="done" ${taskFilter === 'done' ? 'selected' : ''}>Erledigt</option></select></div></div>
+        <div class="task-list">${visible.length ? visible.map(taskRow).join('') : '<div class="empty">Keine passenden Aufgaben gefunden.</div>'}</div></section>`;
+    }
+    function propertiesPage() {
+      return `<div class="welcome"><div><p class="eyebrow">Schweden · Värmland · Dalarna · Bohuslän</p><h1>Ferienhäuser</h1><p class="subtitle">Ferienhaus-Details und Servicebedarf auf einen Blick.</p></div><button class="primary-btn" data-action="add-property">${icon('plus')} Ferienhaus hinzufügen</button></div>
+        <div class="property-grid">${properties.map((rawProperty) => {
+          const property = propertyWithDefaults(rawProperty);
+          const assignedProviders = providers.filter((provider) => (servicePartnerAssignments[property.id] || []).includes(provider.id));
+          const partnerSummary = assignedProviders.length ? assignedProviders.map((provider) => provider.name).join(', ') : 'Keine Servicepartner zugeordnet';
+          return `<article class="card property-card" data-action="view-property" data-property="${escapeHtml(property.id)}" tabindex="0" role="link" aria-label="Objektübersicht für ${escapeHtml(property.name)} öffnen">${property.photo ? `<img class="property-card-photo" src="${escapeHtml(property.photo)}" alt="Hausfoto: ${escapeHtml(property.name)}">` : ''}<div class="property-top"><div class="property-symbol">${icon('home')}</div><span class="status">Ferienhaus · Schweden</span></div>${inspectionStatusBadge(property.id)}<h3>${escapeHtml(property.name)}</h3><div class="property-address">${escapeHtml(property.address)}</div><p class="property-assigned-partners"><strong>Servicepartner:</strong> ${escapeHtml(partnerSummary)}</p><div class="property-specs"><span class="property-spec">${escapeHtml(propertySummary(property))}</span></div><div class="property-details"><div><span>Region</span><strong>${escapeHtml(property.region || '—')}</strong></div><div><span>Kapazität</span><strong>${escapeHtml(property.beds || '—')}</strong></div><div><span>Heizsystem</span><strong>${escapeHtml(property.heatingSystem || '—')}${property.heatingYear ? ` · ${escapeHtml(property.heatingYear)}` : ''}</strong></div><div><span>Kamin / Feuerstätte</span><strong>${property.fireplace === 'yes' ? escapeHtml(property.fireplaceType || 'Vorhanden') : property.fireplace === 'no' ? 'Nicht vorhanden' : '—'}</strong></div><div><span>Letzte Sanierungen</span><strong>${property.lastRenovations ? 'Hinterlegt' : 'Noch offen'}</strong></div><div><span>Sanierungsplanung</span><strong>${property.plannedRenovations ? 'Hinterlegt' : 'Noch offen'}</strong></div></div></article>`;
+        }).join('')}</div>`;
+    }
+    function propertyDetailPage() {
+      const property = propertyWithDefaults(properties.find((item) => item.id === selectedPropertyId) || properties[0]);
+      const beds = Number.parseInt(property.beds, 10);
+      const assignedProviders = providers.filter((provider) => (servicePartnerAssignments[property.id] || []).includes(provider.id));
+      const partnerSummary = assignedProviders.length ? assignedProviders.map((provider) => provider.name).join(', ') : 'Keine Servicepartner zugeordnet';
+      return `<div class="welcome"><div><p class="eyebrow">Objektverwaltung · ${escapeHtml(property.region || 'Schweden')}</p><h1>${escapeHtml(property.name)}</h1><p class="subtitle">${escapeHtml(property.address)}</p>${inspectionStatusBadge(property.id)}</div><button class="primary-btn" data-action="edit-property" data-property="${escapeHtml(property.id)}">Bearbeiten</button></div>
+        <section class="card"><div class="card-head"><div><h2 class="card-title">Gebäude & Grundstück</h2><p class="card-caption">Stammdaten, Zustand und Kapazität</p></div><button class="text-btn" data-page="properties">← Alle Ferienhäuser</button></div><div style="padding:16px">${property.photo ? `<img class="property-photo" src="${escapeHtml(property.photo)}" alt="Hausfoto: ${escapeHtml(property.name)}">` : ''}<div class="property-grid">
+          <article class="property-card"><span class="form-label">Baujahr</span><strong>${escapeHtml(property.yearBuilt || 'Noch nicht eingetragen')}</strong></article>
+          <article class="property-card"><span class="form-label">Wohnfläche</span><strong>${property.livingArea ? `${escapeHtml(property.livingArea)} m²` : 'Noch nicht eingetragen'}</strong></article>
+          <article class="property-card"><span class="form-label">Grundstücksgröße</span><strong>${property.plotSize ? `${escapeHtml(property.plotSize)} m²` : 'Noch nicht eingetragen'}</strong></article>
+          <article class="property-card"><span class="form-label">Zimmer / Schlafplätze</span><strong>${property.rooms ? `${escapeHtml(property.rooms)} Zimmer` : 'Zimmerzahl offen'} · ${Number.isFinite(beds) ? `${beds} Schlafplätze` : 'Schlafplätze offen'}</strong></article>
+          <article class="property-card"><span class="form-label">Gebäudezustand</span><strong>${escapeHtml(property.condition || 'Noch nicht bewertet')}</strong></article>
+          <article class="property-card"><span class="form-label">Heizsystem / Baujahr</span><strong>${escapeHtml([property.heatingSystem, property.heatingYear].filter(Boolean).join(' · ') || 'Noch nicht eingetragen')}</strong></article>
+          <article class="property-card"><span class="form-label">Kamin / Feuerstätte</span><strong>${escapeHtml(property.fireplace === 'yes' ? [property.fireplaceType || 'Vorhanden', property.fireplaceInspection ? `Kontrolle ${property.fireplaceInspection}` : ''].filter(Boolean).join(' · ') : property.fireplace === 'no' ? 'Nicht vorhanden' : 'Noch nicht eingetragen')}</strong></article>
+          <article class="property-card"><span class="form-label">Region</span><strong>${escapeHtml(property.region || '—')}</strong></article>
+        </div></div></section>
+        <section class="card"><div class="card-head"><div><h2 class="card-title">Sanierungshistorie</h2><p class="card-caption">Bisherige Maßnahmen und Jahre</p></div></div><div class="property-notes" style="margin:0;padding:17px 19px">${property.lastRenovations ? escapeHtml(property.lastRenovations).replace(/\\n/g, '<br>') : 'Noch keine Sanierungen eingetragen.'}</div></section>
+        <section class="card"><div class="card-head"><div><h2 class="card-title">Anstehende Sanierungen</h2><p class="card-caption">Voraussichtlicher Zeitraum und nächste Schritte</p></div></div><div class="property-notes" style="margin:0;padding:17px 19px">${property.plannedRenovations ? escapeHtml(property.plannedRenovations).replace(/\\n/g, '<br>') : 'Noch keine Maßnahmen geplant.'}</div></section>
+        <section class="card" style="margin-top:16px"><div class="card-head"><div><h2 class="card-title">Zugeordnete Servicepartner</h2><p class="card-caption">Auswahl und Verwaltung über „Servicepartner finden“.</p></div><button class="text-btn" data-action="find-providers" data-property="${escapeHtml(property.id)}">Servicepartner verwalten →</button></div><div class="property-notes" style="margin:0;padding:16px 19px">${escapeHtml(partnerSummary)}</div></section>
+        <div class="section-toolbar"><button class="secondary-btn" data-action="find-providers" data-property="${escapeHtml(property.id)}">Servicepartner im Umkreis suchen →</button></div>
+        <section class="remove-property-section" aria-label="Ferienhaus entfernen"><div><strong>Ferienhaus dauerhaft entfernen</strong><p>Das Haus und die zugehörigen Aufgaben, Kosten sowie Hauskontrolldaten werden gelöscht.</p></div><button class="danger-btn" data-action="remove-property" data-property="${escapeHtml(property.id)}">Haus entfernen</button></section>`;
+    }
+    function providersPage() {
+      const property = properties.find((item) => item.id === providerProperty) || properties[0];
+      const matches = providers.filter((provider) => {
+        const distance = provider.distances[property.id];
+        const matchesCategory = providerCategory === 'all' || provider.category === providerCategory || (providerCategory === 'house' && provider.category === 'inspection');
+        const matchesFavorite = !onlyFavorites || favorites.includes(provider.id);
+        const haystack = `${provider.name} ${provider.town} ${provider.specialty || ''} ${provider.services} ${provider.phone || ''} ${provider.email || ''}`.toLocaleLowerCase('de');
+        return Number.isFinite(distance) && distance <= providerRadius && matchesCategory && matchesFavorite && haystack.includes(providerSearch.toLocaleLowerCase('de'));
+      }).sort((a, b) => Number(favorites.includes(b.id)) - Number(favorites.includes(a.id)) || a.distances[property.id] - b.distances[property.id] || Number(b.priority === 'A') - Number(a.priority === 'A'));
+      const resultLimit = 12;
+      const limitedMatches = matches.slice(0, resultLimit);
+      const providerCards = limitedMatches.map((provider) => {
+        const isFavorite = favorites.includes(provider.id);
+        const isAssigned = (servicePartnerAssignments[property.id] || []).includes(provider.id);
+        const categoryLabel = provider.category === 'renovation' ? 'Sanierung & Bau' : provider.category === 'inspection' ? 'Hauskontrolle' : 'Hausservice';
+        return `<article class="provider-result">
+          <div class="provider-result-top"><div class="provider-avatar">${escapeHtml(provider.initials)}</div><div style="flex:1"><h3>${escapeHtml(provider.name)}</h3><p>${escapeHtml(provider.services)}</p></div>
+            <button class="assign-provider-btn ${isAssigned ? 'selected' : ''}" data-action="toggle-provider-assignment" data-provider="${escapeHtml(provider.id)}" data-property="${escapeHtml(property.id)}" aria-label="${isAssigned ? 'Zuordnung für ' + escapeHtml(property.name) + ' entfernen' : 'Diesem Ferienhaus zuordnen'}" aria-pressed="${isAssigned}" title="${isAssigned ? 'Zugeordnet – Klick zum Entfernen' : 'Diesem Ferienhaus zuordnen'}">${icon('check')}</button>
+            <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-favorite="${escapeHtml(provider.id)}" aria-label="${isFavorite ? 'Aus Favoriten entfernen' : 'Als Favorit speichern'}" aria-pressed="${isFavorite}" title="${isFavorite ? 'Aus Favoriten entfernen' : 'Als Favorit speichern'}"><svg viewBox="0 0 24 24" fill="${isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/></svg></button>
+          </div>
+          <div class="provider-details"><span class="provider-type ${provider.category === 'renovation' ? 'renovation' : ''}">${categoryLabel}</span>${provider.specialty ? `<span class="provider-specialty">${escapeHtml(provider.specialty)}</span>` : ''}<span>${escapeHtml(provider.town)}</span><span>ca. ${provider.distances[property.id]} km von ${escapeHtml(property.name)}</span></div>
+          <div class="provider-result-footer"><span class="task-meta">Umkreis: ${providerRadius} km</span><div class="provider-contact-links">${providerContactLinks(provider)}</div></div>
+        </article>`;
+      }).join('');
+      return `<div class="welcome"><div><p class="eyebrow">Schwedische Betriebe vor Ort</p><h1>Servicepartner finden</h1><p class="subtitle">Hausservice und Sanierungsunternehmen im Umkreis deiner Ferienhäuser.</p></div></div>
+        <section class="card"><div class="card-head"><div><h2 class="card-title">Betriebe im Umkreis von ${providerRadius} km</h2><p class="card-caption">${limitedMatches.length} von ${matches.length} passenden Betrieben · maximal 12 · nächstgelegene zuerst</p></div><button class="secondary-btn" data-action="toggle-favorites">${onlyFavorites ? 'Alle anzeigen' : `☆ Favoriten (${favorites.length})`}</button></div>
+          <div class="provider-filters">
+            <label><span class="form-label">Ferienhaus</span><select id="provider-property" class="filter-select" aria-label="Ferienhaus wählen">${properties.map((item) => `<option value="${item.id}" ${item.id === property.id ? 'selected' : ''}>${escapeHtml(item.name)} · ${escapeHtml(item.region)}</option>`).join('')}</select></label>
+            <label><span class="form-label">Umkreis</span><select id="provider-radius" class="filter-select" aria-label="Suchradius">${[10, 20, 50, 100].map((radius) => `<option value="${radius}" ${radius === providerRadius ? 'selected' : ''}>${radius} km</option>`).join('')}</select></label>
+            <label><span class="form-label">Art des Dienstleisters</span><select id="provider-category" class="filter-select" aria-label="Dienstleisterart"><option value="all" ${providerCategory === 'all' ? 'selected' : ''}>Alle Kategorien</option><option value="house" ${providerCategory === 'house' ? 'selected' : ''}>Hausservice & Hauskontrolle</option><option value="renovation" ${providerCategory === 'renovation' ? 'selected' : ''}>Sanierung & Bau</option></select></label>
+            <label class="search"><span class="form-label">Suche</span>${icon('search')}<input id="provider-search" type="search" placeholder="Betrieb, Ort oder Gewerk …" value="${escapeHtml(providerSearch)}"></label>
+          </div>
+          <div class="provider-results">${providerCards || `<div class="empty" style="grid-column:1/-1">Keine passenden Betriebe im Umkreis von ${providerRadius} km gefunden. Ändere den Radius, die Kategorie oder Suche.</div>`}</div>
+          <p class="source-note">Maximal 12 passende Betriebe werden angezeigt. Dies sind Anbieter aus öffentlich verlinkten Websites und der Partnerdatenbank 2026, keine bestätigten Vertragspartner. Telefonnummern und E-Mail-Adressen stammen aus der bereitgestellten Datenbank. Entfernungen sind grobe Luftlinien-Schätzungen anhand der angegebenen Orte bzw. Einsatzgebiete; Straßenentfernung, Einsatzradius, Verfügbarkeit, Leistungen und Kontaktdaten bitte vor Beauftragung direkt bestätigen.</p>
+        </section>`;
+    }
+    function costsPage() {
+      const property = properties.find((item) => item.id === costProperty) || properties[0];
+      const costs = annualCosts[property.id] || initialCosts[property.id];
+      const total = costCategories.reduce((sum, category) => sum + Math.max(0, Number(costs[category.id]) || 0), 0);
+      const money = (amount) => new Intl.NumberFormat('sv-SE', { maximumFractionDigits: 0 }).format(amount) + ' kr';
+      return `<div class="welcome"><div><p class="eyebrow">Årlig planering · SEK</p><h1>Ferienhaus-Kosten</h1><p class="subtitle">Planwerte pro Ferienhaus bearbeiten und laufende Kosten im Blick behalten.</p></div></div>
+        <div class="section-toolbar"><label><span class="form-label">Ferienhaus</span><select id="cost-property" class="filter-select" aria-label="Ferienhaus für Jahreskosten wählen">${properties.map((item) => `<option value="${item.id}" ${item.id === property.id ? 'selected' : ''}>${escapeHtml(item.name)} · ${escapeHtml(item.region)}</option>`).join('')}</select></label></div>
+        <div class="cost-summary"><article class="cost-total"><small>Geschätzte Jahreskosten · ${escapeHtml(property.name)}</small><strong id="annual-total">${money(total)}</strong><span>Ändere die Beträge unten, um dein eigenes Budget abzubilden.</span></article><article class="card cost-average"><span>Monatlicher Budgetdurchschnitt</span><strong id="monthly-total">${money(Math.round(total / 12))}</strong></article></div>
+        <section class="card"><div class="card-head"><div><h2 class="card-title">Jährliche Kostenposten</h2><p class="card-caption">Beträge in Schwedischen Kronen (SEK) pro Jahr</p></div><span class="status pending">Planwerte bearbeiten</span></div>
+          <div class="cost-list">${costCategories.map((category) => `<label class="cost-item"><span class="cost-item-main"><strong>${escapeHtml(category.label)}</strong><small>${escapeHtml(category.note)}</small></span><span class="cost-input-wrap"><input class="cost-input" type="number" min="0" step="100" inputmode="numeric" data-cost="${category.id}" aria-label="${escapeHtml(category.label)} pro Jahr" value="${Number(costs[category.id]) || 0}"><span>kr/Jahr</span></span></label>`).join('')}</div>
+          <div class="cost-disclaimer">Orientierungsbudget, keine Kostenprognose: Versicherungs-, Energie-, Wasser-/Abwasser-, Abfall-, Kamin- und Wartungskosten unterscheiden sich je nach Haus, Nutzung und Gemeinde. Die Werte sind editierbare Beispiel-Planwerte. Die Immobilienabgabe 2026 ist mit dem gesetzlichen Höchstbetrag von 10 425 kr angesetzt; sie beträgt grundsätzlich 0,75 % des Steuerwerts bis zum Höchstbetrag. Ersetze Planwerte durch Bescheide und Angebote.</div>
+          <p class="source-note">Quellen: <a href="https://www.skatteverket.se/privat/fastigheterochbostad/fastighetsskattfastighetsavgift.4.69ef368911e1304a625800013531.html" target="_blank" rel="noopener noreferrer">Skatteverket · Immobilienabgabe</a> · <a href="https://www.svensktvatten.se/om-oss/verksamhet-och-strategi/fakta-om-vatten/va-taxa/" target="_blank" rel="noopener noreferrer">Svenskt Vatten · lokale VA-Tarife</a> · <a href="https://www.konsumenternas.se/forsakringar/boendeforsakringar/fritidshusforsakringar/" target="_blank" rel="noopener noreferrer">Konsumenternas · Ferienhausversicherung</a>.</p>
+        </section>`;
+    }
+    function inspectionsPage() {
+      const property = properties.find((item) => item.id === inspectionProperty) || properties[0];
+      const checks = inspectionChecks[property.id] || {};
+      const selectedIds = Array.isArray(inspectionSelections[property.id]) ? inspectionSelections[property.id] : absenceChecklist.map((item) => item.id);
+      const selectedItems = absenceChecklist.filter((item) => selectedIds.includes(item.id));
+      const complete = selectedItems.filter((item) => checks[item.id]).length;
+      const cadence = inspectionCadence[property.id] === 'weekly' ? 'weekly' : 'monthly';
+      const entries = inspectionLogEntries(property.id);
+      const lastVisit = entries.length ? formatInspectionDate(entries[entries.length - 1].date) : 'Noch keine Kontrolle protokolliert';
+      const today = localDateKey(new Date());
+      const oversightProviders = providers.filter((provider) => provider.category === 'inspection' && Number.isFinite(provider.distances[property.id]) && provider.distances[property.id] <= providerRadius);
+      const winterKey = `${new Date().getFullYear()}:${property.id}`;
+      const checkedWinterItems = winterChecks[winterKey] || {};
+      const winterComplete = winterChecklist.filter((item) => checkedWinterItems[item.id]).length;
+      const pageHeader = `<div class="welcome"><div><p class="eyebrow">${inspectionView === 'winter' ? 'Saisonvorbereitung · Schweden' : 'Bei längerer Abwesenheit'}</p><h1>${inspectionView === 'winter' ? 'Wintercheckliste' : 'Hauskontrolle'}</h1><p class="subtitle">${inspectionView === 'winter' ? `Bereite ${escapeHtml(property.name)} auf Frost, Schnee und lange Winternächte vor.` : 'Prüfpunkte, Kontrolltaktung und durchgeführte Besuche je Ferienhaus verwalten.'}</p></div>${inspectionView === 'absence' ? `<button class="primary-btn" data-action="finish-inspection" ${!selectedItems.length || complete < selectedItems.length ? 'disabled title="Bitte alle ausgewählten Prüfpunkte abhaken"' : ''}>Kontrolle protokollieren</button>` : ''}</div>`;
+      const propertyAndTabs = `<div class="section-toolbar"><label><span class="form-label">Ferienhaus</span><select id="inspection-property" class="filter-select" aria-label="Ferienhaus für Hauskontrolle wählen">${properties.map((item) => `<option value="${item.id}" ${item.id === property.id ? 'selected' : ''}>${escapeHtml(item.name)} · ${escapeHtml(item.region)}</option>`).join('')}</select></label></div>
+        <div class="inspection-tabs" role="tablist" aria-label="Hauskontrolllisten"><button class="inspection-tab ${inspectionView === 'absence' ? 'active' : ''}" type="button" role="tab" aria-selected="${inspectionView === 'absence'}" data-inspection-view="absence">Abwesenheitskontrolle</button><button class="inspection-tab ${inspectionView === 'winter' ? 'active' : ''}" type="button" role="tab" aria-selected="${inspectionView === 'winter'}" data-inspection-view="winter">Wintercheckliste</button></div>`;
+      if (inspectionView === 'winter') {
+        return `${pageHeader}${propertyAndTabs}
+          <section class="card"><div class="card-head"><div><h2 class="card-title">Wintervorbereitung · ${escapeHtml(property.name)}</h2><p class="card-caption">${winterComplete} von ${winterChecklist.length} Punkten abgehakt · Checkliste ${new Date().getFullYear()}</p></div><div class="winter-progress"><progress max="${winterChecklist.length}" value="${winterComplete}" aria-label="${winterComplete} von ${winterChecklist.length} Winterpunkten erledigt"></progress><strong>${Math.round(winterComplete / winterChecklist.length * 100)} %</strong></div></div>
+            <div class="checklist">${winterChecklist.map((item) => `<label class="checklist-item"><input type="checkbox" data-winter-check="${item.id}" ${checkedWinterItems[item.id] ? 'checked' : ''}><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.detail)}</small></span></label>`).join('')}</div>
+            <div class="inspection-status">Der Fortschritt wird automatisch für dieses Ferienhaus und diese Wintersaison gespeichert. Sicherheits- und Installationsarbeiten bei Bedarf qualifizierten Fachkräften überlassen.</div>
+          </section>`;
+      }
+      return `${pageHeader}${propertyAndTabs}
+        <section class="card"><div class="card-head"><div><h2 class="card-title">Kontrollplan für ${escapeHtml(property.name)}</h2><p class="card-caption">Wähle aus, welche Punkte für dieses Ferienhaus kontrolliert werden sollen.</p></div></div>
+          <div class="inspection-settings">
+            <label><span class="form-label">Kontrolltaktung</span><select id="inspection-cadence" class="filter-select" aria-label="Kontrolltaktung wählen"><option value="weekly" ${cadence === 'weekly' ? 'selected' : ''}>Wöchentlich</option><option value="monthly" ${cadence === 'monthly' ? 'selected' : ''}>Monatlich</option></select></label>
+            <div><span class="form-label">Zu prüfende Punkte</span><div class="inspection-settings-list">${absenceChecklist.map((item) => `<label class="inspection-option"><input type="checkbox" data-inspection-select="${item.id}" ${selectedIds.includes(item.id) ? 'checked' : ''}><span>${escapeHtml(item.title)}</span></label>`).join('')}</div></div>
+          </div>
+          <div class="inspection-status">Taktung: ${cadence === 'weekly' ? 'wöchentlich' : 'monatlich'} · Zuletzt tatsächlich durchgeführt: ${escapeHtml(lastVisit)}${entries.length > 1 ? ` · ${entries.length} protokollierte Kontrollen` : ''}</div>
+        </section>
+        <section class="card"><div class="card-head"><div><h2 class="card-title">Prüfliste bei Abwesenheit</h2><p class="card-caption">${complete} von ${selectedItems.length} ausgewählten Punkten erledigt</p></div><span class="status ${selectedItems.length && complete === selectedItems.length ? '' : 'pending'}">${selectedItems.length && complete === selectedItems.length ? 'Bereit zum Protokollieren' : selectedItems.length ? 'Kontrolle offen' : 'Keine Prüfpunkte ausgewählt'}</span></div>
+          ${selectedItems.length ? `<div class="checklist">${selectedItems.map((item) => `<label class="checklist-item"><input type="checkbox" data-inspection-check="${item.id}" ${checks[item.id] ? 'checked' : ''}><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.detail)}</small></span></label>`).join('')}</div>` : '<div class="empty">Wähle oben mindestens einen Prüfpunkt für dieses Haus aus.</div>'}
+          <div class="inspection-completion-date"><label class="form-label" for="inspection-completed-date">Tatsächlich durchgeführt am</label><input class="form-control" id="inspection-completed-date" type="date" max="${today}" value="${today}" ${!selectedItems.length || complete < selectedItems.length ? 'disabled' : ''}></div>
+          <div class="inspection-status">Bei akuter Gefahr, Wasserschaden oder Einbruch: Abstand halten und Eigentümer bzw. zuständigen Notdienst informieren. Die Prüfliste ist eine organisatorische Hilfe und ersetzt keine fachgerechte Prüfung.</div>
+          ${entries.length ? `<div class="inspection-history"><strong>Protokollierte Termine:</strong> ${entries.slice().reverse().map((entry) => escapeHtml(formatInspectionDate(entry.date))).join(' · ')}</div>` : ''}
+        </section>
+        <section class="card"><div class="card-head"><div><h2 class="card-title">Lokale Hauskontrolle im ${providerRadius}-km-Umkreis</h2><p class="card-caption">${oversightProviders.length} Anbieter mit veröffentlichtem Angebot zur Hausaufsicht</p></div><button class="text-btn" data-action="find-inspectors">Alle Servicepartner →</button></div>
+          ${oversightProviders.length ? oversightProviders.map((provider) => `<div class="provider-card"><div class="provider-avatar">${escapeHtml(provider.initials)}</div><div class="provider-info"><strong>${escapeHtml(provider.name)}</strong><small>${escapeHtml(provider.services)} · ca. ${provider.distances[property.id]} km</small><span class="provider-contact-links">${providerContactLinks(provider)}</span></div></div>`).join('') : '<div class="empty">Für diesen Standort ist noch kein Anbieter mit ausdrücklich belegter Hauskontrolle hinterlegt.</div>'}
+          <p class="source-note">Die Websites belegen das angebotene Leistungsspektrum, nicht Verfügbarkeit oder einen bestehenden Auftrag. Intervall und Umfang individuell absprechen.</p>
+        </section>`;
+    }
+    function persistInspectionData() {
+      try {
+        localStorage.setItem('stugliv-inspection-checks', JSON.stringify(inspectionChecks));
+        localStorage.setItem('stugliv-inspection-log', JSON.stringify(inspectionLog));
+        localStorage.setItem('stugliv-inspection-selections', JSON.stringify(inspectionSelections));
+        localStorage.setItem('stugliv-inspection-cadence', JSON.stringify(inspectionCadence));
+      } catch (error) {
+        console.error('Hauskontroll-Daten konnten nicht gespeichert werden:', error);
+        showToast('Kontrolle konnte nicht gespeichert werden. Browser-Speicher prüfen.');
+      }
+    }
+    function persistWinterChecks() {
+      try {
+        localStorage.setItem('stugliv-winter-checklist', JSON.stringify(winterChecks));
+        return true;
+      } catch (error) {
+        console.error('Winter-Checkliste konnte nicht gespeichert werden:', error);
+        showToast('Winter-Checkliste konnte nicht gespeichert werden. Browser-Speicher prüfen.');
+        return false;
+      }
+    }
+    function finishInspection() {
+      const checks = inspectionChecks[inspectionProperty] || {};
+      const selectedIds = Array.isArray(inspectionSelections[inspectionProperty]) ? inspectionSelections[inspectionProperty] : absenceChecklist.map((item) => item.id);
+      const selectedItems = absenceChecklist.filter((item) => selectedIds.includes(item.id));
+      const completedDate = document.getElementById('inspection-completed-date')?.value;
+      if (!selectedItems.length) {
+        showToast('Bitte erst Prüfpunkte für dieses Haus auswählen.');
+        return;
+      }
+      if (selectedItems.some((item) => !checks[item.id])) {
+        showToast('Bitte erst alle ausgewählten Prüfpunkte abhaken.');
+        return;
+      }
+      if (!completedDate || completedDate > localDateKey(new Date())) {
+        showToast('Bitte ein gültiges Datum der durchgeführten Kontrolle eintragen.');
+        return;
+      }
+      const entries = inspectionLogEntries(inspectionProperty);
+      entries.push({ date: completedDate, completedAt: new Date().toISOString(), checkedItems: selectedIds.slice() });
+      inspectionLog[inspectionProperty] = entries;
+      inspectionChecks[inspectionProperty] = {};
+      persistInspectionData();
+      render();
+      showToast('Hauskontrolle wurde mit Datum protokolliert.');
+    }
+    function localDateKey(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+    function formatInspectionDate(date) {
+      return new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' }).format(new Date(`${date}T12:00:00`));
+    }
+    function inspectionLogEntries(propertyId) {
+      const log = inspectionLog[propertyId];
+      if (Array.isArray(log)) return log
+        .filter((entry) => entry && /^\d{4}-\d{2}-\d{2}$/.test(entry.date))
+        .map((entry) => ({
+          ...entry,
+          checkedItems: Array.isArray(entry.checkedItems) ? entry.checkedItems : absenceChecklist.map((item) => item.id)
+        }));
+      if (typeof log === 'string' && !Number.isNaN(Date.parse(log))) {
+        return [{ date: log.slice(0, 10), completedAt: log, checkedItems: absenceChecklist.map((item) => item.id) }];
+      }
+      return [];
+    }
+    function inspectionIsCurrent(propertyId) {
+      const selectedIds = Array.isArray(inspectionSelections[propertyId])
+        ? inspectionSelections[propertyId]
+        : absenceChecklist.map((item) => item.id);
+      if (!selectedIds.length) return false;
+      const checks = inspectionChecks[propertyId] || {};
+      if (selectedIds.every((id) => checks[id])) return true;
+      const latest = inspectionLogEntries(propertyId)
+        .filter((entry) => selectedIds.every((id) => entry.checkedItems.includes(id)))
+        .sort((a, b) => b.date.localeCompare(a.date))[0];
+      if (!latest || latest.date > localDateKey(new Date())) return false;
+      const lastCompleted = new Date(`${latest.date}T12:00:00`);
+      const dueDate = new Date(lastCompleted);
+      if (inspectionCadence[propertyId] === 'weekly') {
+        dueDate.setDate(dueDate.getDate() + 7);
+      } else {
+        const originalDay = dueDate.getDate();
+        dueDate.setDate(1);
+        dueDate.setMonth(dueDate.getMonth() + 1);
+        const lastDayOfDueMonth = new Date(dueDate.getFullYear(), dueDate.getMonth() + 1, 0).getDate();
+        dueDate.setDate(Math.min(originalDay, lastDayOfDueMonth));
+      }
+      return new Date(`${localDateKey(new Date())}T12:00:00`) <= dueDate;
+    }
+    function inspectionStatusBadge(propertyId) {
+      return inspectionIsCurrent(propertyId)
+        ? `<span class="inspection-status-badge current">${icon('check')}Hauskontrolle aktuell</span>`
+        : '<span class="inspection-status-badge">Hauskontrolle fällig</span>';
+    }
+    function render() {
+      const pages = { dashboard, tasks: tasksPage, properties: propertiesPage, propertyDetail: propertyDetailPage, providers: providersPage, costs: costsPage, inspections: inspectionsPage, calendar: calendarPage, profile: profilePage };
+      const labels = { dashboard: 'Übersicht', tasks: 'Serviceaufgaben', properties: 'Ferienhäuser', propertyDetail: 'Objektübersicht', providers: 'Servicepartner', costs: 'Jahreskosten', inspections: 'Hauskontrolle', calendar: 'Kalender', profile: 'Benutzer' };
+      document.getElementById('breadcrumb').textContent = labels[currentPage];
+      document.getElementById('nav-count').textContent = tasks.filter((task) => !task.done).length;
+      document.querySelectorAll('.nav [data-page]').forEach((button) => button.classList.toggle('active', button.dataset.page === currentPage || (currentPage === 'propertyDetail' && button.dataset.page === 'properties')));
+      updateProfileSummary();
+      pageContent.innerHTML = pages[currentPage]();
+      renderNotifications();
+    }
+    function toggleTask(id) {
+      const task = tasks.find((item) => item.id === Number(id));
+      if (!task) return;
+      task.done = !task.done;
+      persistTasks();
+      render();
+      showToast(task.done ? 'Aufgabe als erledigt markiert.' : 'Aufgabe wieder geöffnet.');
+    }
+    document.addEventListener('click', (event) => {
+      const notificationPanel = document.getElementById('notification-panel');
+      const notificationButton = event.target.closest('#notify-button');
+      if (notificationButton) {
+        const isOpen = notificationPanel.classList.toggle('open');
+        notificationButton.setAttribute('aria-expanded', String(isOpen));
+        renderNotifications();
+        return;
+      }
+      if (!event.target.closest('.notification-wrap')) {
+        notificationPanel.classList.remove('open');
+        document.getElementById('notify-button').setAttribute('aria-expanded', 'false');
+      }
+      const menuToggle = event.target.closest('#menu-toggle');
+      const menu = document.getElementById('main-menu');
+      const toggleButton = document.getElementById('menu-toggle');
+      if (menuToggle) {
+        const isOpen = menu.classList.toggle('open');
+        toggleButton.setAttribute('aria-expanded', String(isOpen));
+        toggleButton.setAttribute('aria-label', isOpen ? 'Menü schließen' : 'Menü öffnen');
+        return;
+      }
+      if (!event.target.closest('.nav-menu-wrap')) {
+        menu.classList.remove('open');
+        toggleButton.setAttribute('aria-expanded', 'false');
+        toggleButton.setAttribute('aria-label', 'Menü öffnen');
+      }
+      const inspectionViewButton = event.target.closest('[data-inspection-view]');
+      if (inspectionViewButton) {
+        inspectionView = inspectionViewButton.dataset.inspectionView;
+        render();
+        return;
+      }
+      const calendarViewButton = event.target.closest('[data-calendar-view]');
+      if (calendarViewButton) {
+        calendarView = calendarViewButton.dataset.calendarView;
+        render();
+        return;
+      }
+      const calendarStepButton = event.target.closest('[data-calendar-step]');
+      if (calendarStepButton) {
+        const step = Number(calendarStepButton.dataset.calendarStep);
+        if (calendarView === 'week') {
+          const selectedDate = new Date(`${calendarSelectedDate}T12:00:00`);
+          selectedDate.setDate(selectedDate.getDate() + step * 7);
+          calendarSelectedDate = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+          calendarMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+        } else {
+          calendarMonth.setDate(1);
+          calendarMonth.setMonth(calendarMonth.getMonth() + step);
+          calendarSelectedDate = `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, '0')}-01`;
+        }
+        render();
+        return;
+      }
+      const calendarMonthButton = event.target.closest('[data-calendar-month]');
+      if (calendarMonthButton) {
+        calendarMonth.setMonth(calendarMonth.getMonth() + Number(calendarMonthButton.dataset.calendarMonth));
+        calendarSelectedDate = `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, '0')}-01`;
+        render();
+        return;
+      }
+      const taskToEdit = event.target.closest('[data-edit-task]');
+      if (taskToEdit) {
+        const task = tasks.find((item) => item.id === Number(taskToEdit.dataset.editTask));
+        if (task) openTaskEditor(task);
+        return;
+      }
+      const calendarDayButton = event.target.closest('[data-calendar-date]');
+      if (calendarDayButton) {
+        calendarSelectedDate = calendarDayButton.dataset.calendarDate;
+        calendarMonth = new Date(`${calendarSelectedDate.slice(0, 7)}-01T12:00:00`);
+        render();
+        return;
+      }
+      const toggle = event.target.closest('[data-toggle]');
+      if (toggle) { toggleTask(toggle.dataset.toggle); return; }
+      const favoriteButton = event.target.closest('[data-favorite]');
+      if (favoriteButton) {
+        const id = favoriteButton.dataset.favorite;
+        favorites = favorites.includes(id) ? favorites.filter((favorite) => favorite !== id) : [...favorites, id];
+        try { localStorage.setItem('stugliv-favorites', JSON.stringify(favorites)); }
+        catch (error) { console.error('Favoriten konnten nicht gespeichert werden:', error); showToast('Favorit konnte nicht gespeichert werden.'); }
+        render();
+        return;
+      }
+      const pageButton = event.target.closest('[data-page]');
+      if (pageButton) {
+        currentPage = pageButton.dataset.page;
+        menu.classList.remove('open');
+        toggleButton.setAttribute('aria-expanded', 'false');
+        toggleButton.setAttribute('aria-label', 'Menü öffnen');
+        notificationPanel.classList.remove('open');
+        document.getElementById('notify-button').setAttribute('aria-expanded', 'false');
+        render();
+        return;
+      }
+      const action = event.target.closest('[data-action]')?.dataset.action;
+      if (action === 'new-task') openTaskModal();
+      if (action === 'finish-inspection') finishInspection();
+      if (action === 'open-inspection') {
+        inspectionProperty = event.target.closest('[data-action]').dataset.property;
+        currentPage = 'inspections';
+        render();
+      }
+      if (action === 'find-inspectors') {
+        providerProperty = inspectionProperty;
+        providerCategory = 'house';
+        providerSearch = '';
+        onlyFavorites = false;
+        currentPage = 'providers';
+        render();
+      }
+      if (action === 'find-providers') {
+        providerProperty = event.target.closest('[data-action]').dataset.property;
+        currentPage = 'providers';
+        render();
+      }
+      if (action === 'toggle-provider-assignment') {
+        const button = event.target.closest('[data-action]');
+        const { property: propertyId, provider: providerId } = button.dataset;
+        const currentAssignments = servicePartnerAssignments[propertyId] || [];
+        const isAssigned = currentAssignments.includes(providerId);
+        const nextMapping = {
+          ...servicePartnerAssignments,
+          [propertyId]: isAssigned
+            ? currentAssignments.filter((id) => id !== providerId)
+            : [...currentAssignments, providerId]
+        };
+        try {
+          localStorage.setItem('stugliv-provider-assignments', JSON.stringify(nextMapping));
+          servicePartnerAssignments = nextMapping;
+          render();
+          showToast(isAssigned ? 'Servicepartner-Zuordnung entfernt.' : 'Servicepartner dem Ferienhaus zugeordnet.');
+        } catch (error) {
+          console.error('Servicepartner-Zuordnung konnte nicht gespeichert werden:', error);
+          showToast('Zuordnung konnte nicht gespeichert werden. Browser-Speicher prüfen.');
+        }
+        return;
+      }
+      if (action === 'add-property') openPropertyModal();
+      if (action === 'edit-property') {
+        const property = properties.find((item) => item.id === event.target.closest('[data-action]').dataset.property);
+        if (property) openPropertyModal(property);
+      }
+      if (action === 'remove-property') {
+        const property = properties.find((item) => item.id === event.target.closest('[data-action]').dataset.property);
+        if (property && window.confirm(`Möchtest du „${property.name}“ wirklich entfernen? Zugehörige Aufgaben, Kosten und Hauskontrolldaten werden ebenfalls gelöscht.`)) {
+          removeProperty(property.id);
+        }
+      }
+      if (action === 'remove-property-photo') {
+        pendingPropertyPhoto = '';
+        const preview = document.getElementById('property-photo-preview');
+        preview.removeAttribute('src');
+        preview.classList.remove('visible');
+        document.getElementById('remove-property-photo').style.display = 'none';
+      }
+      if (action === 'view-property') {
+        selectedPropertyId = event.target.closest('[data-action]').dataset.property;
+        currentPage = 'propertyDetail';
+        render();
+      }
+      if (action === 'toggle-favorites') { onlyFavorites = !onlyFavorites; render(); }
+      if (action === 'add-provider') showToast('Einladungen sind bald verfügbar.');
+    });
+    document.addEventListener('keydown', (event) => {
+      const propertyCard = event.target.closest('.property-card[data-action="view-property"]');
+      if (propertyCard && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        propertyCard.click();
+      }
+    });
+    pageContent.addEventListener('input', (event) => {
+      if (event.target.id === 'task-search') {
+        const cursor = event.target.selectionStart;
+        searchTerm = event.target.value;
+        render();
+        const input = document.getElementById('task-search');
+        input.focus();
+        input.setSelectionRange(cursor, cursor);
+      }
+      if (event.target.id === 'provider-search') {
+        providerSearch = event.target.value;
+        render();
+        const input = document.getElementById('provider-search');
+        input.focus();
+        input.setSelectionRange(providerSearch.length, providerSearch.length);
+      }
+      if (event.target.matches('[data-cost]')) {
+        const costs = annualCosts[costProperty] || (annualCosts[costProperty] = { ...initialCosts[costProperty] });
+        costs[event.target.dataset.cost] = Math.max(0, Number(event.target.value) || 0);
+        const total = costCategories.reduce((sum, category) => sum + (Number(costs[category.id]) || 0), 0);
+        const money = (amount) => new Intl.NumberFormat('sv-SE', { maximumFractionDigits: 0 }).format(amount) + ' kr';
+        document.getElementById('annual-total').textContent = money(total);
+        document.getElementById('monthly-total').textContent = money(Math.round(total / 12));
+      }
+    });
+    pageContent.addEventListener('change', (event) => {
+      if (event.target.id === 'task-filter') { taskFilter = event.target.value; render(); }
+      if (event.target.id === 'provider-property') { providerProperty = event.target.value; render(); }
+      if (event.target.id === 'provider-category') { providerCategory = event.target.value; render(); }
+      if (event.target.id === 'provider-radius') { providerRadius = Number(event.target.value); render(); }
+      if (event.target.id === 'cost-property') { costProperty = event.target.value; render(); }
+      if (event.target.id === 'inspection-property') { inspectionProperty = event.target.value; render(); }
+      if (event.target.id === 'inspection-cadence') {
+        inspectionCadence[inspectionProperty] = event.target.value;
+        persistInspectionData();
+        render();
+        return;
+      }
+      if (event.target.matches('[data-inspection-select]')) {
+        const selectedIds = Array.isArray(inspectionSelections[inspectionProperty])
+          ? inspectionSelections[inspectionProperty]
+          : absenceChecklist.map((item) => item.id);
+        const itemId = event.target.dataset.inspectionSelect;
+        inspectionSelections[inspectionProperty] = event.target.checked
+          ? [...new Set([...selectedIds, itemId])]
+          : selectedIds.filter((id) => id !== itemId);
+        if (!event.target.checked && inspectionChecks[inspectionProperty]) {
+          delete inspectionChecks[inspectionProperty][itemId];
+        }
+        persistInspectionData();
+        render();
+        return;
+      }
+      if (event.target.matches('[data-cost]')) {
+        try { localStorage.setItem('stugliv-costs', JSON.stringify(annualCosts)); }
+        catch (error) { console.error('Jahreskosten konnten nicht gespeichert werden:', error); showToast('Kosten konnten nicht gespeichert werden.'); }
+      }
+      if (event.target.matches('[data-inspection-check]')) {
+        const checks = inspectionChecks[inspectionProperty] || (inspectionChecks[inspectionProperty] = {});
+        checks[event.target.dataset.inspectionCheck] = event.target.checked;
+        persistInspectionData();
+        render();
+      }
+      if (event.target.matches('[data-winter-check]')) {
+        const winterKey = `${new Date().getFullYear()}:${inspectionProperty}`;
+        const previousChecks = winterChecks[winterKey] || {};
+        winterChecks = {
+          ...winterChecks,
+          [winterKey]: { ...previousChecks, [event.target.dataset.winterCheck]: event.target.checked }
+        };
+        if (!persistWinterChecks()) winterChecks[winterKey] = previousChecks;
+        render();
+      }
+    });
+    document.getElementById('property-form').addEventListener('change', async (event) => {
+      if (event.target.name !== 'photo') return;
+      const file = event.target.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        showToast('Bitte eine Bilddatei auswählen.');
+        event.target.value = '';
+        return;
+      }
+      try {
+        pendingPropertyPhoto = await compressPropertyPhoto(file);
+        const preview = document.getElementById('property-photo-preview');
+        preview.src = pendingPropertyPhoto;
+        preview.classList.add('visible');
+        document.getElementById('remove-property-photo').style.display = 'inline';
+      } catch (error) {
+        console.error('Hausfoto konnte nicht verarbeitet werden:', error);
+        showToast('Hausfoto konnte nicht geladen werden.');
+      }
+    });
+    document.getElementById('property-form').addEventListener('click', (event) => {
+      if (event.target.id === 'remove-property-photo') {
+        pendingPropertyPhoto = '';
+        const preview = document.getElementById('property-photo-preview');
+        preview.removeAttribute('src');
+        preview.classList.remove('visible');
+        document.getElementById('remove-property-photo').style.display = 'none';
+        document.querySelector('#property-form [name="photo"]').value = '';
+      }
+    });
+    pageContent.addEventListener('submit', (event) => {
+      if (event.target.id !== 'profile-form') return;
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const updatedProfile = {
+        name: String(formData.get('name')).trim(),
+        username: String(formData.get('username')).trim(),
+        email: String(formData.get('email')).trim()
+      };
+      try {
+        localStorage.setItem('stugliv-profile', JSON.stringify(updatedProfile));
+        profileData = updatedProfile;
+        render();
+        showToast('Profil wurde gespeichert.');
+      } catch (error) {
+        console.error('Profil konnte nicht gespeichert werden:', error);
+        showToast('Profil konnte nicht gespeichert werden. Browser-Speicher prüfen.');
+      }
+    });
+    document.getElementById('task-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      const isEditing = editingTaskId !== null;
+      const previousTasks = tasks;
+      const updatedTask = {
+        ...(isEditing ? tasks.find((task) => task.id === editingTaskId) : {}),
+        id: isEditing ? editingTaskId : Date.now(),
+        title: String(formData.get('title')).trim(),
+        property: String(formData.get('property')),
+        date: String(formData.get('date')),
+        priority: String(formData.get('priority')),
+        done: isEditing ? tasks.find((task) => task.id === editingTaskId)?.done ?? false : false
+      };
+      if (isEditing && !tasks.some((task) => task.id === editingTaskId)) {
+        showToast('Diese Aufgabe wurde nicht gefunden und konnte nicht bearbeitet werden.');
+        closeTaskModal();
+        return;
+      }
+      tasks = isEditing
+        ? tasks.map((task) => task.id === editingTaskId ? updatedTask : task)
+        : [...tasks, updatedTask];
+      if (!persistTasks()) {
+        tasks = previousTasks;
+        return;
+      }
+      closeTaskModal();
+      event.currentTarget.reset();
+      if (!isEditing) currentPage = 'tasks';
+      render();
+      showToast(isEditing ? 'Aufgabe wurde aktualisiert.' : 'Neue Aufgabe wurde gespeichert.');
+    });
+    document.getElementById('property-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const formData = new FormData(form);
+      const previous = editingPropertyId ? properties.find((property) => property.id === editingPropertyId) : null;
+      const photoFile = form.elements.photo.files?.[0];
+      if (photoFile && !pendingPropertyPhoto) {
+        try {
+          pendingPropertyPhoto = await compressPropertyPhoto(photoFile);
+        } catch (error) {
+          console.error('Hausfoto konnte nicht verarbeitet werden:', error);
+          showToast('Hausfoto konnte nicht verarbeitet werden. Bitte erneut auswählen oder entfernen.');
+          return;
+        }
+      }
+      const property = propertyWithDefaults({
+        ...(previous || {}),
+        id: previous?.id || `property-${Date.now()}`,
+        name: String(formData.get('name')).trim(),
+        address: String(formData.get('address')).trim(),
+        region: String(formData.get('region')).trim(),
+        yearBuilt: String(formData.get('yearBuilt')).trim(),
+        livingArea: String(formData.get('livingArea')).trim(),
+        plotSize: String(formData.get('plotSize')).trim(),
+        rooms: String(formData.get('rooms')).trim(),
+        beds: formData.get('beds') ? `${String(formData.get('beds')).trim()} Schlafplätze` : '',
+        heatingSystem: String(formData.get('heatingSystem') || ''),
+        heatingYear: String(formData.get('heatingYear') || '').trim(),
+        fireplace: String(formData.get('fireplace') || ''),
+        fireplaceType: String(formData.get('fireplaceType') || ''),
+        fireplaceInspection: String(formData.get('fireplaceInspection') || ''),
+        fireplaceNotes: String(formData.get('fireplaceNotes') || '').trim(),
+        photo: pendingPropertyPhoto,
+        condition: String(formData.get('condition')),
+        lastRenovations: String(formData.get('lastRenovations')).trim(),
+        plannedRenovations: String(formData.get('plannedRenovations')).trim()
+      });
+      const index = properties.findIndex((item) => item.id === property.id);
+      if (index === -1) properties.push(property);
+      else properties[index] = property;
+      if (!initialCosts[property.id]) initialCosts[property.id] = Object.fromEntries(costCategories.map((category) => [category.id, category.amount]));
+      annualCosts[property.id] ||= { ...initialCosts[property.id] };
+      selectedPropertyId = property.id;
+      if (!saveProperties()) {
+        if (previous) properties[index] = previous;
+        else properties = properties.filter((item) => item.id !== property.id);
+        return;
+      }
+      closePropertyModal();
+      currentPage = 'propertyDetail';
+      render();
+      showToast(previous ? 'Ferienhausdaten wurden aktualisiert.' : 'Ferienhaus wurde angelegt.');
+    });
+    document.getElementById('close-modal').addEventListener('click', closeTaskModal);
+    document.getElementById('cancel-modal').addEventListener('click', closeTaskModal);
+    document.getElementById('close-property-modal').addEventListener('click', closePropertyModal);
+    document.getElementById('cancel-property-modal').addEventListener('click', closePropertyModal);
+    document.getElementById('property-modal').addEventListener('click', (event) => {
+      if (event.target.id === 'property-modal') closePropertyModal();
+    });
+    document.getElementById('task-modal').addEventListener('click', (event) => {
+      if (event.target.id === 'task-modal') closeTaskModal();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeTaskModal();
+        closePropertyModal();
+      }
+    });
+    document.getElementById('notify-button').addEventListener('click', () => showToast('Du bist auf dem neuesten Stand.'));
+    document.getElementById('settings-button').addEventListener('click', () => { currentPage = 'profile'; render(); });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        const menu = document.getElementById('main-menu');
+        const toggleButton = document.getElementById('menu-toggle');
+        menu.classList.remove('open');
+        toggleButton.setAttribute('aria-expanded', 'false');
+        toggleButton.setAttribute('aria-label', 'Menü öffnen');
+        document.getElementById('notification-panel').classList.remove('open');
+        document.getElementById('notify-button').setAttribute('aria-expanded', 'false');
+      }
+    });
+    render();
+  </script>
+</body>
+</html>
