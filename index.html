@@ -304,6 +304,7 @@
     button.calendar-event-chip { cursor: pointer; }
     button.calendar-event-chip:hover, button.calendar-event-chip:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
     .calendar-event-chip.task { color: #805526; background: var(--amber-soft); }
+    .calendar-event-chip.booking { color: #a61b1b; background: #fde8e8; }
     .calendar-view-toggle { display: flex; flex: none; gap: 3px; padding: 3px; border-radius: 8px; background: #f1f2ed; }
     .calendar-view-toggle button { padding: 6px 9px; border: 0; border-radius: 6px; color: var(--muted); background: transparent; font-size: 10px; }
     .calendar-view-toggle button.active { color: var(--green); background: white; box-shadow: 0 1px 3px rgba(0,0,0,.08); font-weight: 700; }
@@ -318,21 +319,23 @@
     .calendar-week-view .calendar-event-chip { font-size: 9px; }
     .calendar-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
     .calendar-dot.task { background: var(--amber); }
+    .calendar-dot.booking { background: #c62828; }
     .calendar-legend { display: flex; gap: 16px; padding: 0 18px 14px; color: var(--muted); font-size: 10px; }
     .calendar-legend span { display: inline-flex; align-items: center; gap: 6px; }
     .calendar-event { display: flex; align-items: flex-start; gap: 12px; padding: 13px 18px; border-top: 1px solid #f0f1ee; }
     button.calendar-event { width: 100%; border: 0; color: inherit; background: transparent; text-align: left; cursor: pointer; }
     button.calendar-event:hover strong { color: var(--green); }
     .calendar-event-time { min-width: 42px; color: var(--green); font-size: 10px; font-weight: 700; }
+    .calendar-event.booking .calendar-event-time, .calendar-event.booking strong { color: #a61b1b; }
     .calendar-event strong { display: block; font-size: 11px; }
     .calendar-event small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
     .booking-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: 16px; }
     .booking-calendar .calendar-day { min-height: 82px; padding: 6px; cursor: default; }
     .booking-calendar .calendar-date-button { cursor: pointer; }
     .booking-calendar .calendar-day.in-range { border-color: #bfd0c0; background: #edf3ec; }
+    .booking-calendar .calendar-day.booked-range { border-color: #edc2c2; background: #fff0f0; }
     .booking-calendar .calendar-day.range-start, .booking-calendar .calendar-day.range-end { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
     .booking-calendar .calendar-event-chip { font-size: 8px; }
-    .calendar-event-chip.booking { color: #345d82; background: #eaf2fa; }
     .booking-form { padding: 17px; }
     .booking-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .booking-form-grid .full { grid-column: 1 / -1; }
@@ -1196,7 +1199,7 @@
       return `<div class="welcome"><div><p class="eyebrow">Planung & Buchungen</p><h1>Kalender</h1><p class="subtitle">Buchungen und datierte Serviceaufgaben im Monatsüberblick.</p></div></div>
         <section class="card"><div class="card-head"><h2 class="card-title">Termine</h2><div class="calendar-toolbar"><button class="calendar-nav" data-calendar-step="-1" aria-label="${calendarView === 'week' ? 'Vorherige Woche' : 'Vorheriger Monat'}">‹</button><strong>${escapeHtml(monthTitle)}</strong><button class="calendar-nav" data-calendar-step="1" aria-label="${calendarView === 'week' ? 'Nächste Woche' : 'Nächster Monat'}">›</button><div class="calendar-view-toggle" aria-label="Kalenderansicht"><button type="button" data-calendar-view="month" class="${calendarView === 'month' ? 'active' : ''}" aria-pressed="${calendarView === 'month'}">Monat</button><button type="button" data-calendar-view="week" class="${calendarView === 'week' ? 'active' : ''}" aria-pressed="${calendarView === 'week'}">Woche</button></div></div></div>
           <div class="calendar-grid ${calendarView === 'week' ? 'calendar-week-view' : ''}">${weekdayLabels.map((label) => `<div class="calendar-weekday">${label}</div>`).join('')}${cells.join('')}</div>
-          <div class="calendar-legend"><span><i class="calendar-dot"></i>Buchungen</span><span><i class="calendar-dot task"></i>Serviceaufgabe</span></div>
+          <div class="calendar-legend"><span><i class="calendar-dot booking"></i>Buchungen</span><span><i class="calendar-dot task"></i>Serviceaufgabe</span></div>
         </section>
         <section class="card" style="margin-top:16px"><div class="card-head"><div><h2 class="card-title">${escapeHtml(selectedLabel)}</h2><p class="card-caption">${selectedEvents.length} ${selectedEvents.length === 1 ? 'Termin' : 'Termine'}</p></div><button class="text-btn" data-page="tasks">Aufgaben ansehen →</button></div>
           ${selectedEvents.length ? selectedEvents.map((item) => {
@@ -1204,7 +1207,7 @@
             return item.type === 'task'
               ? `<button type="button" class="calendar-event" data-edit-task="${item.taskId}" aria-label="Aufgabe bearbeiten: ${escapeHtml(item.title)}">${eventDetails}</button>`
               : item.type === 'booking'
-                ? `<button type="button" class="calendar-event" data-edit-booking="${escapeHtml(item.bookingId)}" aria-label="Buchung bearbeiten: ${escapeHtml(item.title)}">${eventDetails}</button>`
+                ? `<button type="button" class="calendar-event booking" data-edit-booking="${escapeHtml(item.bookingId)}" aria-label="Buchung bearbeiten: ${escapeHtml(item.title)}">${eventDetails}</button>`
                 : `<div class="calendar-event">${eventDetails}</div>`;
           }).join('') : '<div class="empty">Für diesen Tag sind keine Termine eingetragen.</div>'}
         </section>`;
@@ -1235,7 +1238,7 @@
         }).join('');
         const selected = dateKey === bookingStartDate || dateKey === bookingEndDate;
         const dayLabel = new Intl.DateTimeFormat('de-DE', { dateStyle: 'full' }).format(dayDate);
-        cells.push(`<div class="calendar-day booking-calendar-day ${dayDate.getMonth() !== month ? 'outside' : ''} ${dateKey === todayKey ? 'today' : ''} ${draftRange || bookedRange ? 'in-range' : ''} ${rangeStart ? 'range-start' : ''} ${rangeEnd ? 'range-end' : ''}">
+        cells.push(`<div class="calendar-day booking-calendar-day ${dayDate.getMonth() !== month ? 'outside' : ''} ${dateKey === todayKey ? 'today' : ''} ${draftRange || bookedRange ? 'in-range' : ''} ${bookedRange ? 'booked-range' : ''} ${rangeStart ? 'range-start' : ''} ${rangeEnd ? 'range-end' : ''}">
           <button type="button" class="calendar-date-button" data-booking-date="${dateKey}" aria-label="${escapeHtml(dayLabel)}${selected ? ', ausgewählt' : ''}" aria-pressed="${selected}"><span class="calendar-day-number">${dayDate.getDate()}</span></button>${eventChips}</div>`);
       }
       const dateSummary = bookingStartDate && bookingEndDate
@@ -1246,7 +1249,7 @@
         <div class="booking-layout">
           <section class="card booking-calendar"><div class="card-head"><div><h2 class="card-title">Belegungskalender</h2><p class="card-caption">Anreise und Abreise durch Auswahl von zwei Tagen festlegen</p></div><div class="calendar-toolbar"><button type="button" class="calendar-nav" data-booking-month="-1" aria-label="Vorheriger Monat">‹</button><strong>${escapeHtml(monthTitle)}</strong><button type="button" class="calendar-nav" data-booking-month="1" aria-label="Nächster Monat">›</button></div></div>
             <div class="calendar-grid">${dayLabels.map((label) => `<div class="calendar-weekday">${label}</div>`).join('')}${cells.join('')}</div>
-            <div class="calendar-legend"><span><i class="calendar-dot"></i>Gebuchte Übernachtung</span><span><i class="calendar-dot task"></i>Abreise</span></div>
+            <div class="calendar-legend"><span><i class="calendar-dot booking"></i>Gebuchte Übernachtung</span><span><i class="calendar-dot task"></i>Abreise</span></div>
           </section>
           <section class="card"><div class="card-head"><div><h2 class="card-title">${editingBookingId ? 'Buchung bearbeiten' : 'Buchung erfassen'}</h2><p class="card-caption">Gastangaben für die Buchung</p></div></div>
             <form id="booking-form" class="booking-form"><p class="booking-hint">Wähle im Kalender zuerst den Anreisetag und anschließend den Abreisetag. Der Abreisetag ist nicht mehr als Übernachtung belegt.</p>
