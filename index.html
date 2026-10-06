@@ -1323,9 +1323,7 @@
         const haystack = `${provider.name} ${provider.town} ${provider.specialty || ''} ${provider.services} ${provider.phone || ''} ${provider.email || ''}`.toLocaleLowerCase('de');
         return Number.isFinite(distance) && distance <= providerRadius && matchesCategory && matchesFavorite && haystack.includes(providerSearch.toLocaleLowerCase('de'));
       }).sort((a, b) => Number(favorites.includes(b.id)) - Number(favorites.includes(a.id)) || a.distances[property.id] - b.distances[property.id] || Number(b.priority === 'A') - Number(a.priority === 'A'));
-      const resultLimit = 12;
-      const limitedMatches = matches.slice(0, resultLimit);
-      const providerCards = limitedMatches.map((provider) => {
+      const providerCards = matches.map((provider) => {
         const isFavorite = favorites.includes(provider.id);
         const isAssigned = (servicePartnerAssignments[property.id] || []).includes(provider.id);
         const categoryLabel = provider.category === 'renovation' ? 'Sanierung & Bau' : provider.category === 'inspection' ? 'Hauskontrolle' : 'Hausservice';
@@ -1339,7 +1337,7 @@
         </article>`;
       }).join('');
       return `<div class="welcome"><div><p class="eyebrow">Schwedische Betriebe vor Ort</p><h1>Servicepartner finden</h1><p class="subtitle">Hausservice und Sanierungsunternehmen im Umkreis deiner Ferienhäuser.</p></div></div>
-        <section class="card"><div class="card-head"><div><h2 class="card-title">Betriebe im Umkreis von ${providerRadius} km</h2><p class="card-caption">${limitedMatches.length} von ${matches.length} passenden Betrieben · maximal 12 · nächstgelegene zuerst</p></div><button class="secondary-btn" data-action="toggle-favorites">${onlyFavorites ? 'Alle anzeigen' : `☆ Favoriten (${favorites.length})`}</button></div>
+        <section class="card"><div class="card-head"><div><h2 class="card-title">Betriebe im Umkreis von ${providerRadius} km</h2><p class="card-caption">${matches.length} passende Betriebe · nächstgelegene zuerst</p></div><button class="secondary-btn" data-action="toggle-favorites">${onlyFavorites ? 'Alle anzeigen' : `☆ Favoriten (${favorites.length})`}</button></div>
           <div class="provider-filters">
             <label><span class="form-label">Ferienhaus</span><select id="provider-property" class="filter-select" aria-label="Ferienhaus wählen">${properties.map((item) => `<option value="${item.id}" ${item.id === property.id ? 'selected' : ''}>${escapeHtml(item.name)} · ${escapeHtml(item.region)}</option>`).join('')}</select></label>
             <label><span class="form-label">Umkreis</span><select id="provider-radius" class="filter-select" aria-label="Suchradius">${[10, 20, 50, 100].map((radius) => `<option value="${radius}" ${radius === providerRadius ? 'selected' : ''}>${radius} km</option>`).join('')}</select></label>
@@ -1347,7 +1345,7 @@
             <label class="search"><span class="form-label">Suche</span>${icon('search')}<input id="provider-search" type="search" placeholder="Betrieb, Ort oder Gewerk …" value="${escapeHtml(providerSearch)}"></label>
           </div>
           <div class="provider-results">${providerCards || `<div class="empty" style="grid-column:1/-1">Keine passenden Betriebe im Umkreis von ${providerRadius} km gefunden. Ändere den Radius, die Kategorie oder Suche.</div>`}</div>
-          <p class="source-note">Maximal 12 passende Betriebe werden angezeigt. Dies sind Anbieter aus öffentlich verlinkten Websites und der Partnerdatenbank 2026, keine bestätigten Vertragspartner. Telefonnummern und E-Mail-Adressen stammen aus der bereitgestellten Datenbank. Entfernungen sind grobe Luftlinien-Schätzungen anhand der angegebenen Orte bzw. Einsatzgebiete; Straßenentfernung, Einsatzradius, Verfügbarkeit, Leistungen und Kontaktdaten bitte vor Beauftragung direkt bestätigen.</p>
+          <p class="source-note">Dies sind Anbieter aus öffentlich verlinkten Websites und der Partnerdatenbank 2026, keine bestätigten Vertragspartner. Telefonnummern und E-Mail-Adressen stammen aus der bereitgestellten Datenbank. Entfernungen sind grobe Luftlinien-Schätzungen anhand der angegebenen Orte bzw. Einsatzgebiete; Straßenentfernung, Einsatzradius, Verfügbarkeit, Leistungen und Kontaktdaten bitte vor Beauftragung direkt bestätigen.</p>
         </section>`;
     }
     function costsPage() {
