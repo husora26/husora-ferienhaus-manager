@@ -158,7 +158,7 @@
     .provider-filters .search input { width: 100%; }
     .provider-filters .search svg { top: 31px; }
     .provider-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; padding: 16px; }
-    .provider-result { position: relative; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    .provider-result { position: relative; display: flex; flex-direction: column; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
     .provider-result-top { display: flex; align-items: flex-start; gap: 10px; padding-right: 28px; }
     .provider-result .provider-avatar { width: 37px; height: 37px; }
     .provider-result h3 { margin: 1px 0 4px; font-size: 12px; }
@@ -173,9 +173,13 @@
     .property-assigned-partners strong { color: var(--ink); font-size: 9px; }
     .favorite-btn.active { border-color: #f0dfd4; color: #bd694e; background: #fff5ef; }
     .provider-details { display: flex; flex-wrap: wrap; gap: 7px 11px; margin: 14px 0 12px; color: #626c64; font-size: 10px; }
+    .provider-town { color: #626c64; font-size: 10px; }
     .provider-type { display: inline-block; padding: 4px 7px; border-radius: 5px; color: var(--green); background: var(--green-soft); font-size: 9px; font-weight: 700; }
     .provider-type.renovation { color: #805526; background: var(--amber-soft); }
-    .provider-result-footer { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+    .provider-result-footer { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); }
+    .provider-location-distance { display: flex; align-items: center; gap: 10px; min-width: 0; color: #626c64; font-size: 10px; }
+    .provider-location-distance .provider-distance { padding-left: 10px; border-left: 1px solid var(--line); white-space: nowrap; }
+    .provider-result-footer .provider-contact-links { justify-content: flex-start; }
     .provider-contact-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 10px; min-width: 0; }
     .provider-source { color: var(--green); font-size: 10px; font-weight: 700; text-decoration: none; }
     .provider-source:hover { text-decoration: underline; }
@@ -1332,8 +1336,8 @@
             <button class="assign-provider-btn ${isAssigned ? 'selected' : ''}" data-action="toggle-provider-assignment" data-provider="${escapeHtml(provider.id)}" data-property="${escapeHtml(property.id)}" aria-label="${isAssigned ? 'Zuordnung für ' + escapeHtml(property.name) + ' entfernen' : 'Diesem Ferienhaus zuordnen'}" aria-pressed="${isAssigned}" title="${isAssigned ? 'Zugeordnet – Klick zum Entfernen' : 'Diesem Ferienhaus zuordnen'}">${icon('check')}</button>
             <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-favorite="${escapeHtml(provider.id)}" aria-label="${isFavorite ? 'Aus Favoriten entfernen' : 'Als Favorit speichern'}" aria-pressed="${isFavorite}" title="${isFavorite ? 'Aus Favoriten entfernen' : 'Als Favorit speichern'}"><svg viewBox="0 0 24 24" fill="${isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/></svg></button>
           </div>
-          <div class="provider-details"><span class="provider-type ${provider.category === 'renovation' ? 'renovation' : ''}">${categoryLabel}</span>${provider.specialty ? `<span class="provider-specialty">${escapeHtml(provider.specialty)}</span>` : ''}<span>${escapeHtml(provider.town)}</span></div>
-          <div class="provider-result-footer"><span class="task-meta">Entfernung zum Ferienhaus: ca. ${provider.distances[property.id]} km</span><div class="provider-contact-links">${providerContactLinks(provider)}</div></div>
+          <div class="provider-details"><span class="provider-type ${provider.category === 'renovation' ? 'renovation' : ''}">${categoryLabel}</span>${provider.specialty ? `<span class="provider-specialty">${escapeHtml(provider.specialty)}</span>` : ''}</div>
+          <div class="provider-result-footer"><div class="provider-location-distance"><span class="provider-town">${escapeHtml(provider.town)}</span><span class="provider-distance">Entfernung ${provider.distances[property.id]} km</span></div><div class="provider-contact-links">${providerContactLinks(provider)}</div></div>
         </article>`;
       }).join('');
       return `<div class="welcome"><div><p class="eyebrow">Schwedische Betriebe vor Ort</p><h1>Servicepartner finden</h1><p class="subtitle">Hausservice und Sanierungsunternehmen im Umkreis deiner Ferienhäuser.</p></div></div>
