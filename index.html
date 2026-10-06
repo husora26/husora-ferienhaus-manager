@@ -319,6 +319,26 @@
     .calendar-event-time { min-width: 42px; color: var(--green); font-size: 10px; font-weight: 700; }
     .calendar-event strong { display: block; font-size: 11px; }
     .calendar-event small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .booking-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: 16px; }
+    .booking-calendar .calendar-day { min-height: 82px; padding: 6px; cursor: default; }
+    .booking-calendar .calendar-date-button { cursor: pointer; }
+    .booking-calendar .calendar-day.in-range { border-color: #bfd0c0; background: #edf3ec; }
+    .booking-calendar .calendar-day.range-start, .booking-calendar .calendar-day.range-end { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
+    .booking-calendar .calendar-event-chip { font-size: 8px; }
+    .calendar-event-chip.booking { color: #345d82; background: #eaf2fa; }
+    .booking-form { padding: 17px; }
+    .booking-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .booking-form-grid .full { grid-column: 1 / -1; }
+    .booking-hint { margin: 0 0 13px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .booking-range-summary { min-height: 17px; margin: 12px 0; color: var(--green-dark); font-size: 11px; font-weight: 650; }
+    .booking-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid #f0f1ee; }
+    .booking-row-info { flex: 1; min-width: 0; }
+    .booking-row-info strong, .booking-row-info small { display: block; }
+    .booking-row-info strong { font-size: 11px; }
+    .booking-row-info small { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .booking-row-actions { display: flex; gap: 6px; }
+    .booking-row-actions button { padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: white; font-size: 9px; }
+    .booking-row-actions button:hover { border-color: #b8c8ba; color: var(--green); }
     .profile-form { max-width: 650px; padding: 20px; }
     .profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
     .profile-grid .full { grid-column: 1 / -1; }
@@ -381,6 +401,11 @@
       .calendar-grid { overflow: hidden; }
       .calendar-day { min-width: 0; }
       .calendar-event-chip { font-size: 7px; padding: 2px; }
+      .booking-layout { grid-template-columns: 1fr; }
+      .booking-calendar .calendar-day { min-height: 62px; }
+      .booking-calendar .calendar-event-chip { font-size: 6px; }
+      .booking-row { align-items: flex-start; flex-wrap: wrap; }
+      .booking-row-actions { width: 100%; }
     }
   </style>
 </head>
@@ -407,6 +432,7 @@
           <button class="active" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg><span>Übersicht</span></button>
           <button data-page="properties"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 21V5l8-2 8 2v16"/><path d="M8 8h2m4 0h2M8 12h2m4 0h2M10 21v-5h4v5"/></svg><span>Objektverwaltung</span></button>
           <button data-page="calendar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h2m4 0h2m-8 3h2"/></svg><span>Kalender</span></button>
+          <button data-page="bookings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h3m2 0h3m-8 3h3"/></svg><span>Buchung</span></button>
           <button data-page="tasks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M8.5 10h7m-7 4h7m-7 4h4"/></svg><span>Serviceaufgaben</span><i class="nav-count" id="nav-count">0</i></button>
           <button data-page="inspections"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg><span>Hauskontrolle</span></button>
           <button data-page="providers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14.5 6.5a5 5 0 0 0-6.7 6.7L3 18l3 3 4.8-4.8a5 5 0 0 0 6.7-6.7l-3.1 3.1-3-3z"/><path d="m15.5 4.5 4 4"/></svg><span>Servicepartner finden</span></button>
@@ -469,7 +495,7 @@
       return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ''}</svg>`;
     };
     const initialTasks = [
-      { id: 1, title: 'Endreinigung vor dem Gästewechsel organisieren', property: 'Stuga Björkbacken', date: '2026-10-07', priority: 'urgent', done: false },
+      { id: 1, title: 'Endreinigung vor der Buchung organisieren', property: 'Stuga Björkbacken', date: '2026-10-07', priority: 'urgent', done: false },
       { id: 2, title: 'Brunnenwasserfilter und Frostschutz prüfen', property: 'Sjöstugan', date: '2026-10-08', priority: 'soon', done: false },
       { id: 3, title: 'Saunaofen und Rauchmelder kontrollieren', property: 'Kusthuset', date: '2026-10-09', priority: 'normal', done: false },
       { id: 4, title: 'Schlüsselbox für nächste Anreise vorbereiten', property: 'Stuga Björkbacken', date: '2026-10-11', priority: 'normal', done: false },
@@ -643,7 +669,7 @@
       { id: 'energy', label: 'Strom & Heizung', note: 'Stromvertrag, Netzgebühr, Verbrauch und ggf. weitere Heizenergie.', amount: 14000 },
       { id: 'water', label: 'Wasser, Abwasser & Abfall', note: 'Gemeindetarif oder Brunnen/Abwasseranlage; abhängig vom Standort.', amount: 9000 },
       { id: 'fire', label: 'Kamin, Schornstein & Brandschutz', note: 'Kehren, vorgeschriebene Kontrollen und kleinere Sicherheitsartikel.', amount: 2500 },
-      { id: 'cleaning', label: 'Reinigung & Gästewechsel', note: 'Turnover-Reinigung, Wäsche und Verbrauchsmaterial.', amount: 12000 },
+      { id: 'cleaning', label: 'Reinigung & Buchung', note: 'Turnover-Reinigung, Wäsche und Verbrauchsmaterial.', amount: 12000 },
       { id: 'inspection', label: 'Hauskontrollen bei Abwesenheit', note: 'Planwert für regelmäßige Vor-Ort-Besuche; Angebot des lokalen Anbieters eintragen.', amount: 6000 },
       { id: 'grounds', label: 'Schnee, Garten & Außenbereich', note: 'Räumung, Rasen, Wege und saisonale Arbeiten.', amount: 8000 },
       { id: 'maintenance', label: 'Wartung & Reparaturrücklage', note: 'Individuelle Rücklage für Zustand und geplante Erneuerungen.', amount: 15000 }
@@ -736,6 +762,24 @@
     let calendarMonth = new Date(Number(firstCalendarEventDate.slice(0, 4)), Number(firstCalendarEventDate.slice(5, 7)) - 1, 1);
     let calendarSelectedDate = firstCalendarEventDate;
     let calendarView = 'month';
+    let bookingCalendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    let bookingStartDate = '';
+    let bookingEndDate = '';
+    let editingBookingId = null;
+    let bookingDraft = { propertyId: properties[0]?.id || '', guestName: '', guestCount: '1', arrivalTime: '15:00', notes: '' };
+    let bookings = [];
+    try {
+      const savedBookings = localStorage.getItem('stugliv-bookings');
+      const parsedBookings = savedBookings ? JSON.parse(savedBookings) : [];
+      if (!Array.isArray(parsedBookings)) throw new Error('Ungültige Buchungsliste');
+      bookings = parsedBookings.filter((booking) => booking && typeof booking.id === 'string'
+        && typeof booking.propertyId === 'string' && typeof booking.guestName === 'string'
+        && /^\d{4}-\d{2}-\d{2}$/.test(booking.startDate) && /^\d{4}-\d{2}-\d{2}$/.test(booking.endDate));
+      if (bookings.length !== parsedBookings.length) console.error('Ungültige Buchungseinträge wurden beim Laden ausgelassen.');
+    } catch (error) {
+      console.error('Buchungen konnten nicht geladen werden:', error);
+      bookings = [];
+    }
     let editingPropertyId = null;
     let onlyFavorites = false;
     let favorites = [];
@@ -834,6 +878,7 @@
       }
       const nextProperties = properties.filter((item) => item.id !== propertyId);
       const nextTasks = tasks.filter((task) => task.property !== property.name && task.property !== property.id && task.propertyId !== propertyId);
+      const nextBookings = bookings.filter((booking) => booking.propertyId !== propertyId);
       const withoutProperty = (record) => Object.fromEntries(Object.entries(record).filter(([id]) => id !== propertyId));
       const nextCosts = withoutProperty(annualCosts);
       const nextInspectionChecks = withoutProperty(inspectionChecks);
@@ -844,6 +889,7 @@
       const updates = {
         'stugliv-properties': nextProperties,
         'stugliv-tasks': nextTasks,
+        'stugliv-bookings': nextBookings,
         'stugliv-costs': nextCosts,
         'stugliv-inspection-checks': nextInspectionChecks,
         'stugliv-inspection-log': nextInspectionLog,
@@ -869,6 +915,8 @@
       }
       properties = nextProperties;
       tasks = nextTasks;
+      bookings = nextBookings;
+      if (editingBookingId && !bookings.some((booking) => booking.id === editingBookingId)) resetBookingEditor();
       annualCosts = nextCosts;
       inspectionChecks = nextInspectionChecks;
       inspectionLog = nextInspectionLog;
@@ -944,6 +992,38 @@
         return false;
       }
     }
+    function persistBookings(nextBookings) {
+      try {
+        localStorage.setItem('stugliv-bookings', JSON.stringify(nextBookings));
+        return true;
+      } catch (error) {
+        console.error('Buchungen konnten nicht gespeichert werden:', error);
+        showToast('Buchungen konnten nicht gespeichert werden. Browser-Speicher prüfen.');
+        return false;
+      }
+    }
+    function resetBookingEditor() {
+      editingBookingId = null;
+      bookingStartDate = '';
+      bookingEndDate = '';
+      bookingDraft = { propertyId: properties[0]?.id || '', guestName: '', guestCount: '1', arrivalTime: '15:00', notes: '' };
+    }
+    function editBooking(booking) {
+      if (!booking) return;
+      editingBookingId = booking.id;
+      bookingDraft = {
+        propertyId: booking.propertyId,
+        guestName: booking.guestName,
+        guestCount: String(booking.guestCount || 1),
+        arrivalTime: booking.arrivalTime || '15:00',
+        notes: booking.notes || ''
+      };
+      bookingStartDate = booking.startDate;
+      bookingEndDate = booking.endDate;
+      bookingCalendarMonth = new Date(`${bookingStartDate.slice(0, 7)}-01T12:00:00`);
+      currentPage = 'bookings';
+      render();
+    }
     function showToast(message) {
       const toast = document.getElementById('toast');
       toast.textContent = message;
@@ -984,21 +1064,35 @@
     }
     function dashboard() {
       const open = tasks.filter((task) => !task.done);
-      const upcomingChanges = activeGuestChanges();
+      const today = localDateKey(new Date());
+      const weekEnd = new Date();
+      weekEnd.setDate(weekEnd.getDate() + 7);
+      const upcomingChanges = [
+        ...activeGuestChanges(),
+        ...bookings.filter((booking) => booking.startDate >= today && booking.startDate <= localDateKey(weekEnd)).map((booking) => ({
+          title: `Check-in · ${booking.guestName}`,
+          property: properties.find((property) => property.id === booking.propertyId)?.name || 'Ferienhaus',
+          date: booking.startDate,
+          time: booking.arrivalTime || '',
+          detail: `${booking.guestCount} ${Number(booking.guestCount) === 1 ? 'Person' : 'Personen'}`,
+          type: 'booking',
+          bookingId: booking.id
+        }))
+      ];
       const currentInspections = properties.filter((property) => inspectionIsCurrent(property.id)).length;
       const firstName = profileData.name.trim().split(/\s+/)[0] || 'Willkommen';
-      return `<div class="welcome"><div><p class="eyebrow">Husora · Dein Schweden-Portfolio · ${fmtLongDate()}</p><h1>Guten Tag, ${escapeHtml(firstName)} <span aria-hidden="true">☀️</span></h1><p class="subtitle">Gästewechsel, Stugapflege und Serviceeinsätze für deine Ferienhäuser.</p></div><button class="primary-btn" data-action="new-task">${icon('plus')} Aufgabe planen</button></div>
+      return `<div class="welcome"><div><p class="eyebrow">Husora · Dein Schweden-Portfolio · ${fmtLongDate()}</p><h1>Guten Tag, ${escapeHtml(firstName)} <span aria-hidden="true">☀️</span></h1><p class="subtitle">Buchungen, Stugapflege und Serviceeinsätze für deine Ferienhäuser.</p></div><button class="primary-btn" data-action="new-task">${icon('plus')} Aufgabe planen</button></div>
         <section class="stats" aria-label="Kennzahlen">
           <button class="stat" data-page="properties"><img class="stat-art" src="assets/ferienhaus.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Ferienhäuser</span><span class="stat-icon">${icon('property')}</span></div><div class="stat-value">${String(properties.length).padStart(2, '0')}</div><div class="stat-note"><em>Värmland · Dalarna · Bohuslän</em></div></button>
-          <button class="stat" data-page="tasks"><img class="stat-art" src="assets/hausservice.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Offene Serviceaufgaben</span><span class="stat-icon amber">${icon('task')}</span></div><div class="stat-value">${String(open.length).padStart(2, '0')}</div><div class="stat-note"><em>${open.filter((task) => task.priority === 'urgent').length} dringend</em> vor dem nächsten Gästewechsel</div></button>
-          <button class="stat" data-page="calendar"><img class="stat-art" src="assets/gaestewechsel.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Gästewechsel diese Woche</span><span class="stat-icon">${icon('calendar')}</span></div><div class="stat-value">${String(upcomingChanges.length).padStart(2, '0')}</div><div class="stat-note">Nächster Check-in <em>im Kalender</em></div></button>
+          <button class="stat" data-page="tasks"><img class="stat-art" src="assets/hausservice.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Offene Serviceaufgaben</span><span class="stat-icon amber">${icon('task')}</span></div><div class="stat-value">${String(open.length).padStart(2, '0')}</div><div class="stat-note"><em>${open.filter((task) => task.priority === 'urgent').length} dringend</em> vor der nächsten Buchung</div></button>
+          <button class="stat" data-page="bookings"><img class="stat-art" src="assets/gaestewechsel.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Buchungen diese Woche</span><span class="stat-icon">${icon('calendar')}</span></div><div class="stat-value">${String(upcomingChanges.length).padStart(2, '0')}</div><div class="stat-note">Buchungen <em>verwalten</em></div></button>
           <button class="stat" data-page="inspections"><img class="stat-art" src="assets/hauskontrolle.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Hausservice · Prüfstatus</span><span class="stat-icon">${icon('inspection')}</span></div><div class="stat-value">${currentInspections}/${properties.length}</div><div class="stat-note"><em>${currentInspections === properties.length ? 'Alle Kontrollen aktuell' : `${properties.length - currentInspections} Prüfung${properties.length - currentInspections === 1 ? '' : 'en'} offen`}</em></div></button>
         </section>
         <div class="columns">
           <section class="card"><div class="card-head"><div><h2 class="card-title">Service vor Ort</h2><p class="card-caption">${open.length} offene Aufgaben an deinen schwedischen Ferienhäusern</p></div><button class="text-btn" data-page="tasks">Alle Aufgaben →</button></div><div class="task-list">${open.length ? open.slice(0, 4).map(taskRow).join('') : '<div class="empty">Alles erledigt — großartig!</div>'}</div></section>
           <div>
-            <section class="card"><div class="card-head"><div><h2 class="card-title">Nächste Gästewechsel</h2><p class="card-caption">Anreise, Endreinigung und Schlüssel</p></div><button class="text-btn" data-page="calendar">Kalender →</button></div>
-              ${upcomingChanges.length ? upcomingChanges.map((event) => `<div class="appointment"><div class="date-tile"><b>${fmtDate(event.date).split(' ')[0]}</b><small>${fmtDate(event.date).split(' ')[1]}</small></div><div class="appointment-info"><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(event.detail)} · ${escapeHtml(event.time)}</small></div></div>`).join('') : '<div class="empty">Für deine Ferienhäuser sind keine Gästewechsel eingetragen.</div>'}
+            <section class="card"><div class="card-head"><div><h2 class="card-title">Nächste Buchungen</h2><p class="card-caption">Anreise, Endreinigung und Schlüssel</p></div><button class="text-btn" data-page="bookings">Buchungen →</button></div>
+              ${upcomingChanges.length ? upcomingChanges.map((event) => `<div class="appointment"><div class="date-tile"><b>${fmtDate(event.date).split(' ')[0]}</b><small>${fmtDate(event.date).split(' ')[1]}</small></div><div class="appointment-info"><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(event.detail)} · ${escapeHtml(event.time)}</small></div></div>`).join('') : '<div class="empty">Für deine Ferienhäuser sind keine Buchungen eingetragen.</div>'}
             </section>
             <section class="card"><div class="card-head"><div><h2 class="card-title">Hausservice-Übersicht</h2><p class="card-caption">Prüfstatus und zugeordnete Servicepartner je Ferienhaus</p></div><button class="text-btn" data-page="inspections">Hauskontrolle →</button></div>
               <div class="house-service-list">${properties.map((property) => {
@@ -1013,6 +1107,31 @@
     function calendarEvents() {
       return [
         ...activeGuestChanges(),
+        ...bookings.flatMap((booking) => {
+          const propertyName = properties.find((property) => property.id === booking.propertyId)?.name || 'Ferienhaus';
+          return [
+            {
+              id: `booking-${booking.id}-arrival`,
+              bookingId: booking.id,
+              title: `Check-in · ${booking.guestName}`,
+              property: propertyName,
+              date: booking.startDate,
+              time: booking.arrivalTime || '',
+              detail: `${booking.guestCount} ${Number(booking.guestCount) === 1 ? 'Person' : 'Personen'}`,
+              type: 'booking'
+            },
+            {
+              id: `booking-${booking.id}-departure`,
+              bookingId: booking.id,
+              title: `Check-out · ${booking.guestName}`,
+              property: propertyName,
+              date: booking.endDate,
+              time: '',
+              detail: 'Abreise',
+              type: 'booking'
+            }
+          ];
+        }),
         ...tasks.filter((task) => task.date).map((task) => ({
           id: `task-${task.id}`,
           taskId: task.id,
@@ -1054,24 +1173,91 @@
           const label = `${escapeHtml(item.time ? `${item.time} ` : '')}${escapeHtml(item.title)}`;
           return item.type === 'task'
             ? `<button type="button" class="calendar-event-chip task" data-edit-task="${item.taskId}" aria-label="Aufgabe bearbeiten: ${escapeHtml(item.title)}">${label}</button>`
-            : `<span class="calendar-event-chip">${label}</span>`;
+            : item.type === 'booking'
+              ? `<button type="button" class="calendar-event-chip booking" data-edit-booking="${escapeHtml(item.bookingId)}" aria-label="Buchung bearbeiten: ${escapeHtml(item.title)}">${label}</button>`
+              : `<span class="calendar-event-chip">${label}</span>`;
         }).join('');
         const moreEvents = dayEvents.length > maxVisible ? `<span class="calendar-event-chip">+${dayEvents.length - maxVisible} weitere</span>` : '';
         cells.push(`<div class="calendar-day ${calendarView === 'month' && dayDate.getMonth() !== month ? 'outside' : ''} ${dateKey === calendarSelectedDate ? 'selected' : ''} ${dateKey === todayKey ? 'today' : ''}" data-calendar-date="${dateKey}"><button type="button" class="calendar-date-button" data-calendar-date="${dateKey}" aria-label="${escapeHtml(new Intl.DateTimeFormat('de-DE', { dateStyle: 'full' }).format(dayDate))}${dayEvents.length ? `, ${dayEvents.length} Termine` : ''}" aria-pressed="${dateKey === calendarSelectedDate}"><span class="calendar-day-number">${dayDate.getDate()}</span></button>${eventChips}${moreEvents}</div>`);
       }
       const selectedLabel = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${calendarSelectedDate}T12:00:00`));
-      return `<div class="welcome"><div><p class="eyebrow">Planung & Gästewechsel</p><h1>Kalender</h1><p class="subtitle">Gästewechsel und datierte Serviceaufgaben im Monatsüberblick.</p></div></div>
+      return `<div class="welcome"><div><p class="eyebrow">Planung & Buchungen</p><h1>Kalender</h1><p class="subtitle">Buchungen und datierte Serviceaufgaben im Monatsüberblick.</p></div></div>
         <section class="card"><div class="card-head"><h2 class="card-title">Termine</h2><div class="calendar-toolbar"><button class="calendar-nav" data-calendar-step="-1" aria-label="${calendarView === 'week' ? 'Vorherige Woche' : 'Vorheriger Monat'}">‹</button><strong>${escapeHtml(monthTitle)}</strong><button class="calendar-nav" data-calendar-step="1" aria-label="${calendarView === 'week' ? 'Nächste Woche' : 'Nächster Monat'}">›</button><div class="calendar-view-toggle" aria-label="Kalenderansicht"><button type="button" data-calendar-view="month" class="${calendarView === 'month' ? 'active' : ''}" aria-pressed="${calendarView === 'month'}">Monat</button><button type="button" data-calendar-view="week" class="${calendarView === 'week' ? 'active' : ''}" aria-pressed="${calendarView === 'week'}">Woche</button></div></div></div>
           <div class="calendar-grid ${calendarView === 'week' ? 'calendar-week-view' : ''}">${weekdayLabels.map((label) => `<div class="calendar-weekday">${label}</div>`).join('')}${cells.join('')}</div>
-          <div class="calendar-legend"><span><i class="calendar-dot"></i>Gästewechsel</span><span><i class="calendar-dot task"></i>Serviceaufgabe</span></div>
+          <div class="calendar-legend"><span><i class="calendar-dot"></i>Buchungen</span><span><i class="calendar-dot task"></i>Serviceaufgabe</span></div>
         </section>
         <section class="card" style="margin-top:16px"><div class="card-head"><div><h2 class="card-title">${escapeHtml(selectedLabel)}</h2><p class="card-caption">${selectedEvents.length} ${selectedEvents.length === 1 ? 'Termin' : 'Termine'}</p></div><button class="text-btn" data-page="tasks">Aufgaben ansehen →</button></div>
           ${selectedEvents.length ? selectedEvents.map((item) => {
             const eventDetails = `<span class="calendar-event-time">${escapeHtml(item.time || (item.type === 'task' ? 'Aufgabe' : ''))}</span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.property)} · ${escapeHtml(item.detail)}</small></span>`;
             return item.type === 'task'
               ? `<button type="button" class="calendar-event" data-edit-task="${item.taskId}" aria-label="Aufgabe bearbeiten: ${escapeHtml(item.title)}">${eventDetails}</button>`
-              : `<div class="calendar-event">${eventDetails}</div>`;
+              : item.type === 'booking'
+                ? `<button type="button" class="calendar-event" data-edit-booking="${escapeHtml(item.bookingId)}" aria-label="Buchung bearbeiten: ${escapeHtml(item.title)}">${eventDetails}</button>`
+                : `<div class="calendar-event">${eventDetails}</div>`;
           }).join('') : '<div class="empty">Für diesen Tag sind keine Termine eingetragen.</div>'}
+        </section>`;
+    }
+    function bookingsPage() {
+      const year = bookingCalendarMonth.getFullYear();
+      const month = bookingCalendarMonth.getMonth();
+      const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+      const monthTitle = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' }).format(bookingCalendarMonth);
+      const todayKey = localDateKey(new Date());
+      const propertyId = properties.some((property) => property.id === bookingDraft.propertyId) ? bookingDraft.propertyId : properties[0]?.id || '';
+      const dayLabels = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+      const cells = [];
+      for (let index = 0; index < 42; index++) {
+        const dayDate = new Date(year, month, index - firstWeekday + 1, 12);
+        const dateKey = localDateKey(dayDate);
+        const draftRange = bookingStartDate && dateKey >= bookingStartDate && (!bookingEndDate || dateKey <= bookingEndDate);
+        const bookedRange = bookings.some((booking) => booking.propertyId === propertyId
+          && dateKey >= booking.startDate && dateKey < booking.endDate);
+        const rangeStart = dateKey === bookingStartDate || bookings.some((booking) => booking.propertyId === propertyId && dateKey === booking.startDate);
+        const rangeEnd = dateKey === bookingEndDate || bookings.some((booking) => booking.propertyId === propertyId && dateKey === booking.endDate);
+        const dayBookings = bookings.filter((booking) => booking.propertyId === propertyId
+          && (dateKey === booking.startDate || dateKey === booking.endDate));
+        const eventChips = dayBookings.map((booking) => {
+          const isArrival = dateKey === booking.startDate;
+          const label = `${isArrival ? 'Anreise' : 'Abreise'} · ${escapeHtml(booking.guestName)}`;
+          return `<button type="button" class="calendar-event-chip booking" data-edit-booking="${escapeHtml(booking.id)}" aria-label="Buchung bearbeiten: ${label}">${label}</button>`;
+        }).join('');
+        const selected = dateKey === bookingStartDate || dateKey === bookingEndDate;
+        const dayLabel = new Intl.DateTimeFormat('de-DE', { dateStyle: 'full' }).format(dayDate);
+        cells.push(`<div class="calendar-day booking-calendar-day ${dayDate.getMonth() !== month ? 'outside' : ''} ${dateKey === todayKey ? 'today' : ''} ${draftRange || bookedRange ? 'in-range' : ''} ${rangeStart ? 'range-start' : ''} ${rangeEnd ? 'range-end' : ''}">
+          <button type="button" class="calendar-date-button" data-booking-date="${dateKey}" aria-label="${escapeHtml(dayLabel)}${selected ? ', ausgewählt' : ''}" aria-pressed="${selected}"><span class="calendar-day-number">${dayDate.getDate()}</span></button>${eventChips}</div>`);
+      }
+      const dateSummary = bookingStartDate && bookingEndDate
+        ? `${fmtDate(bookingStartDate)} – ${fmtDate(bookingEndDate)} · ${Math.round((new Date(`${bookingEndDate}T12:00:00`) - new Date(`${bookingStartDate}T12:00:00`)) / 86400000)} Nächte`
+        : bookingStartDate ? `Anreise: ${fmtDate(bookingStartDate)} · jetzt den Abreisetag auswählen.` : 'Im Kalender zuerst den Anreisetag, danach den Abreisetag auswählen.';
+      const sortedBookings = [...bookings].sort((a, b) => a.startDate.localeCompare(b.startDate));
+      return `<div class="welcome"><div><p class="eyebrow">Buchungsplanung · Schweden</p><h1>Buchung</h1><p class="subtitle">Buchungszeitraum im Kalender auswählen und Ankunftsdaten für deine Ferienhäuser verwalten.</p></div><button class="primary-btn" data-action="new-booking">${icon('plus')} Neue Buchung</button></div>
+        <div class="booking-layout">
+          <section class="card booking-calendar"><div class="card-head"><div><h2 class="card-title">Belegungskalender</h2><p class="card-caption">Anreise und Abreise durch Auswahl von zwei Tagen festlegen</p></div><div class="calendar-toolbar"><button type="button" class="calendar-nav" data-booking-month="-1" aria-label="Vorheriger Monat">‹</button><strong>${escapeHtml(monthTitle)}</strong><button type="button" class="calendar-nav" data-booking-month="1" aria-label="Nächster Monat">›</button></div></div>
+            <div class="calendar-grid">${dayLabels.map((label) => `<div class="calendar-weekday">${label}</div>`).join('')}${cells.join('')}</div>
+            <div class="calendar-legend"><span><i class="calendar-dot"></i>Gebuchte Übernachtung</span><span><i class="calendar-dot task"></i>Abreise</span></div>
+          </section>
+          <section class="card"><div class="card-head"><div><h2 class="card-title">${editingBookingId ? 'Buchung bearbeiten' : 'Buchung erfassen'}</h2><p class="card-caption">Gastangaben für die Buchung</p></div></div>
+            <form id="booking-form" class="booking-form"><p class="booking-hint">Wähle im Kalender zuerst den Anreisetag und anschließend den Abreisetag. Der Abreisetag ist nicht mehr als Übernachtung belegt.</p>
+              <div class="booking-range-summary">${escapeHtml(dateSummary)}</div>
+              <input type="hidden" name="startDate" value="${escapeHtml(bookingStartDate)}"><input type="hidden" name="endDate" value="${escapeHtml(bookingEndDate)}">
+              <div class="booking-form-grid">
+                <label class="full"><span class="form-label">Ferienhaus</span><select class="form-control" name="propertyId" required ${properties.length ? '' : 'disabled'}>${properties.map((property) => `<option value="${escapeHtml(property.id)}" ${property.id === propertyId ? 'selected' : ''}>${escapeHtml(property.name)}</option>`).join('')}</select></label>
+                <label class="full"><span class="form-label">Name des Gasts</span><input class="form-control" name="guestName" required maxlength="100" autocomplete="name" value="${escapeHtml(bookingDraft.guestName)}" placeholder="Vor- und Nachname"></label>
+                <label><span class="form-label">Personen</span><input class="form-control" name="guestCount" type="number" min="1" max="30" step="1" required value="${escapeHtml(bookingDraft.guestCount)}"></label>
+                <label><span class="form-label">Ankunftszeit</span><input class="form-control" name="arrivalTime" type="time" required value="${escapeHtml(bookingDraft.arrivalTime)}"></label>
+                <label class="full"><span class="form-label">Hinweise (optional)</span><textarea class="form-control textarea" name="notes" maxlength="500" placeholder="Zum Beispiel Schlüsselübergabe oder besondere Absprachen">${escapeHtml(bookingDraft.notes)}</textarea></label>
+              </div>
+              <div class="form-actions"><button type="submit" class="primary-btn">${editingBookingId ? 'Änderungen speichern' : 'Buchung speichern'}</button>${editingBookingId ? '<button type="button" class="secondary-btn" data-action="cancel-booking-edit">Abbrechen</button>' : ''}</div>
+            </form>
+          </section>
+        </div>
+        <section class="card" style="margin-top:16px"><div class="card-head"><div><h2 class="card-title">Alle Buchungen</h2><p class="card-caption">${bookings.length} ${bookings.length === 1 ? 'Buchung gespeichert' : 'Buchungen gespeichert'}</p></div></div>
+          ${sortedBookings.length ? sortedBookings.map((booking) => {
+            const propertyName = properties.find((property) => property.id === booking.propertyId)?.name || 'Ferienhaus entfernt';
+            const personCount = Number(booking.guestCount) || 1;
+            const details = `${propertyName} · ${fmtDate(booking.startDate)} – ${fmtDate(booking.endDate)} · ${personCount} ${personCount === 1 ? 'Person' : 'Personen'} · Ankunft ${booking.arrivalTime || '—'}`;
+            return `<div class="booking-row"><div class="booking-row-info"><strong>${escapeHtml(booking.guestName)}</strong><small>${escapeHtml(details)}</small>${booking.notes ? `<small>${escapeHtml(booking.notes)}</small>` : ''}</div><div class="booking-row-actions"><button type="button" data-edit-booking="${escapeHtml(booking.id)}" aria-label="Buchung von ${escapeHtml(booking.guestName)} bearbeiten">Bearbeiten</button><button type="button" data-delete-booking="${escapeHtml(booking.id)}" aria-label="Buchung von ${escapeHtml(booking.guestName)} löschen">Löschen</button></div></div>`;
+          }).join('') : '<div class="empty">Noch keine Buchungen erfasst. Wähle den Zeitraum im Kalender und trage die Gastangaben ein.</div>'}
         </section>`;
     }
     function profilePage() {
@@ -1092,7 +1278,7 @@
         const matchesSearch = `${task.title} ${task.property}`.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesFilter && matchesSearch;
       }).sort((a, b) => a.date.localeCompare(b.date));
-      return `<div class="welcome"><div><p class="eyebrow">Gästewechsel & Instandhaltung</p><h1>Serviceaufgaben</h1><p class="subtitle">Koordiniere Reinigung, Schlüsselübergaben und saisonale Stugapflege.</p></div><button class="primary-btn" data-action="new-task">${icon('plus')} Aufgabe planen</button></div>
+      return `<div class="welcome"><div><p class="eyebrow">Buchungen & Instandhaltung</p><h1>Serviceaufgaben</h1><p class="subtitle">Koordiniere Reinigung, Schlüsselübergaben und saisonale Stugapflege.</p></div><button class="primary-btn" data-action="new-task">${icon('plus')} Aufgabe planen</button></div>
         <section class="card"><div class="card-head"><div><h2 class="card-title">Alle Serviceaufgaben</h2><p class="card-caption">${tasks.filter((task) => !task.done).length} offen · ${tasks.filter((task) => task.done).length} erledigt</p></div></div>
         <div class="section-toolbar" style="padding:0 18px"><label class="search">${icon('search')}<input id="task-search" type="search" placeholder="Aufgaben durchsuchen…" value="${escapeHtml(searchTerm)}"></label><div class="toolbar-right"><select id="task-filter" class="filter-select" aria-label="Aufgaben filtern"><option value="all" ${taskFilter === 'all' ? 'selected' : ''}>Alle Aufgaben</option><option value="open" ${taskFilter === 'open' ? 'selected' : ''}>Offen</option><option value="done" ${taskFilter === 'done' ? 'selected' : ''}>Erledigt</option></select></div></div>
         <div class="task-list">${visible.length ? visible.map(taskRow).join('') : '<div class="empty">Keine passenden Aufgaben gefunden.</div>'}</div></section>`;
@@ -1148,8 +1334,8 @@
             <button class="assign-provider-btn ${isAssigned ? 'selected' : ''}" data-action="toggle-provider-assignment" data-provider="${escapeHtml(provider.id)}" data-property="${escapeHtml(property.id)}" aria-label="${isAssigned ? 'Zuordnung für ' + escapeHtml(property.name) + ' entfernen' : 'Diesem Ferienhaus zuordnen'}" aria-pressed="${isAssigned}" title="${isAssigned ? 'Zugeordnet – Klick zum Entfernen' : 'Diesem Ferienhaus zuordnen'}">${icon('check')}</button>
             <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-favorite="${escapeHtml(provider.id)}" aria-label="${isFavorite ? 'Aus Favoriten entfernen' : 'Als Favorit speichern'}" aria-pressed="${isFavorite}" title="${isFavorite ? 'Aus Favoriten entfernen' : 'Als Favorit speichern'}"><svg viewBox="0 0 24 24" fill="${isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/></svg></button>
           </div>
-          <div class="provider-details"><span class="provider-type ${provider.category === 'renovation' ? 'renovation' : ''}">${categoryLabel}</span>${provider.specialty ? `<span class="provider-specialty">${escapeHtml(provider.specialty)}</span>` : ''}<span>${escapeHtml(provider.town)}</span><span>ca. ${provider.distances[property.id]} km von ${escapeHtml(property.name)}</span></div>
-          <div class="provider-result-footer"><span class="task-meta">Umkreis: ${providerRadius} km</span><div class="provider-contact-links">${providerContactLinks(provider)}</div></div>
+          <div class="provider-details"><span class="provider-type ${provider.category === 'renovation' ? 'renovation' : ''}">${categoryLabel}</span>${provider.specialty ? `<span class="provider-specialty">${escapeHtml(provider.specialty)}</span>` : ''}<span>${escapeHtml(provider.town)}</span></div>
+          <div class="provider-result-footer"><span class="task-meta">Entfernung zum Ferienhaus: ca. ${provider.distances[property.id]} km</span><div class="provider-contact-links">${providerContactLinks(provider)}</div></div>
         </article>`;
       }).join('');
       return `<div class="welcome"><div><p class="eyebrow">Schwedische Betriebe vor Ort</p><h1>Servicepartner finden</h1><p class="subtitle">Hausservice und Sanierungsunternehmen im Umkreis deiner Ferienhäuser.</p></div></div>
@@ -1316,8 +1502,8 @@
         : '<span class="inspection-status-badge">Hauskontrolle fällig</span>';
     }
     function render() {
-      const pages = { dashboard, tasks: tasksPage, properties: propertiesPage, propertyDetail: propertyDetailPage, providers: providersPage, costs: costsPage, inspections: inspectionsPage, calendar: calendarPage, profile: profilePage };
-      const labels = { dashboard: 'Übersicht', tasks: 'Serviceaufgaben', properties: 'Ferienhäuser', propertyDetail: 'Objektübersicht', providers: 'Servicepartner', costs: 'Jahreskosten', inspections: 'Hauskontrolle', calendar: 'Kalender', profile: 'Benutzer' };
+      const pages = { dashboard, tasks: tasksPage, properties: propertiesPage, propertyDetail: propertyDetailPage, providers: providersPage, costs: costsPage, inspections: inspectionsPage, calendar: calendarPage, bookings: bookingsPage, profile: profilePage };
+      const labels = { dashboard: 'Übersicht', tasks: 'Serviceaufgaben', properties: 'Ferienhäuser', propertyDetail: 'Objektübersicht', providers: 'Servicepartner', costs: 'Jahreskosten', inspections: 'Hauskontrolle', calendar: 'Kalender', bookings: 'Buchung', profile: 'Benutzer' };
       document.getElementById('breadcrumb').textContent = labels[currentPage];
       document.getElementById('nav-count').textContent = tasks.filter((task) => !task.done).length;
       document.querySelectorAll('.nav [data-page]').forEach((button) => button.classList.toggle('active', button.dataset.page === currentPage || (currentPage === 'propertyDetail' && button.dataset.page === 'properties')));
@@ -1363,6 +1549,43 @@
       const inspectionViewButton = event.target.closest('[data-inspection-view]');
       if (inspectionViewButton) {
         inspectionView = inspectionViewButton.dataset.inspectionView;
+        render();
+        return;
+      }
+      const bookingMonthButton = event.target.closest('[data-booking-month]');
+      if (bookingMonthButton) {
+        bookingCalendarMonth.setDate(1);
+        bookingCalendarMonth.setMonth(bookingCalendarMonth.getMonth() + Number(bookingMonthButton.dataset.bookingMonth));
+        render();
+        return;
+      }
+      const bookingToEdit = event.target.closest('[data-edit-booking]');
+      if (bookingToEdit) {
+        editBooking(bookings.find((booking) => booking.id === bookingToEdit.dataset.editBooking));
+        return;
+      }
+      const bookingToDelete = event.target.closest('[data-delete-booking]');
+      if (bookingToDelete) {
+        const booking = bookings.find((item) => item.id === bookingToDelete.dataset.deleteBooking);
+        if (!booking || !window.confirm(`Möchtest du die Buchung von „${booking.guestName}“ wirklich löschen?`)) return;
+        const nextBookings = bookings.filter((item) => item.id !== booking.id);
+        if (!persistBookings(nextBookings)) return;
+        bookings = nextBookings;
+        if (editingBookingId === booking.id) resetBookingEditor();
+        render();
+        showToast('Buchung wurde gelöscht.');
+        return;
+      }
+      const bookingDateButton = event.target.closest('[data-booking-date]');
+      if (bookingDateButton) {
+        const selectedDate = bookingDateButton.dataset.bookingDate;
+        if (!bookingStartDate || bookingEndDate || selectedDate <= bookingStartDate) {
+          bookingStartDate = selectedDate;
+          bookingEndDate = '';
+        } else {
+          bookingEndDate = selectedDate;
+        }
+        bookingCalendarMonth = new Date(`${selectedDate.slice(0, 7)}-01T12:00:00`);
         render();
         return;
       }
@@ -1432,6 +1655,15 @@
       }
       const action = event.target.closest('[data-action]')?.dataset.action;
       if (action === 'new-task') openTaskModal();
+      if (action === 'new-booking') {
+        resetBookingEditor();
+        currentPage = 'bookings';
+        render();
+      }
+      if (action === 'cancel-booking-edit') {
+        resetBookingEditor();
+        render();
+      }
       if (action === 'finish-inspection') finishInspection();
       if (action === 'open-inspection') {
         inspectionProperty = event.target.closest('[data-action]').dataset.property;
@@ -1507,6 +1739,9 @@
       }
     });
     pageContent.addEventListener('input', (event) => {
+      if (event.target.form?.id === 'booking-form' && Object.hasOwn(bookingDraft, event.target.name)) {
+        bookingDraft[event.target.name] = event.target.value;
+      }
       if (event.target.id === 'task-search') {
         const cursor = event.target.selectionStart;
         searchTerm = event.target.value;
@@ -1532,6 +1767,10 @@
       }
     });
     pageContent.addEventListener('change', (event) => {
+      if (event.target.form?.id === 'booking-form' && Object.hasOwn(bookingDraft, event.target.name)) {
+        bookingDraft[event.target.name] = event.target.value;
+        if (event.target.name === 'propertyId') render();
+      }
       if (event.target.id === 'task-filter') { taskFilter = event.target.value; render(); }
       if (event.target.id === 'provider-property') { providerProperty = event.target.value; render(); }
       if (event.target.id === 'provider-category') { providerCategory = event.target.value; render(); }
@@ -1611,6 +1850,61 @@
       }
     });
     pageContent.addEventListener('submit', (event) => {
+      if (event.target.id === 'booking-form') {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const propertyId = String(formData.get('propertyId') || '');
+        const guestName = String(formData.get('guestName') || '').trim();
+        const guestCount = Number(formData.get('guestCount'));
+        const startDate = String(formData.get('startDate') || '');
+        const endDate = String(formData.get('endDate') || '');
+        const arrivalTime = String(formData.get('arrivalTime') || '');
+        if (!properties.some((property) => property.id === propertyId)) {
+          showToast('Bitte zuerst ein Ferienhaus auswählen.');
+          return;
+        }
+        if (!startDate || !endDate || endDate <= startDate) {
+          showToast('Bitte im Kalender einen Anreise- und einen späteren Abreisetag auswählen.');
+          return;
+        }
+        if (!guestName || !Number.isInteger(guestCount) || guestCount < 1 || guestCount > 30 || !arrivalTime) {
+          showToast('Bitte Name, gültige Personenzahl und Ankunftszeit prüfen.');
+          return;
+        }
+        const conflictingBooking = bookings.find((booking) => booking.id !== editingBookingId
+          && booking.propertyId === propertyId
+          && startDate < booking.endDate && endDate > booking.startDate);
+        if (conflictingBooking) {
+          showToast(`Der Zeitraum überschneidet sich mit der Buchung von ${conflictingBooking.guestName}.`);
+          return;
+        }
+        if (editingBookingId && !bookings.some((booking) => booking.id === editingBookingId)) {
+          showToast('Diese Buchung wurde nicht gefunden und konnte nicht bearbeitet werden.');
+          resetBookingEditor();
+          render();
+          return;
+        }
+        const isEditing = editingBookingId !== null;
+        const updatedBooking = {
+          id: isEditing ? editingBookingId : `booking-${Date.now()}`,
+          propertyId,
+          guestName,
+          guestCount,
+          startDate,
+          endDate,
+          arrivalTime,
+          notes: String(formData.get('notes') || '').trim()
+        };
+        const nextBookings = isEditing
+          ? bookings.map((booking) => booking.id === editingBookingId ? updatedBooking : booking)
+          : [...bookings, updatedBooking];
+        if (!persistBookings(nextBookings)) return;
+        bookings = nextBookings;
+        resetBookingEditor();
+        render();
+        showToast(isEditing ? 'Buchung wurde aktualisiert.' : 'Buchung wurde gespeichert.');
+        return;
+      }
       if (event.target.id !== 'profile-form') return;
       event.preventDefault();
       const formData = new FormData(event.target);
