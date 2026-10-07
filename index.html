@@ -3,28 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f6f2">
-  <title>Husora — Ferienhaus-Manager</title>
+  <meta name="theme-color" content="#f4efe4">
+  <title>Husora — Fritidshusförvaltare</title>
   <style>
     :root {
       color-scheme: light;
-      --ink: #26342e;
-      --muted: #77817a;
-      --line: #e6e6dc;
-      --paper: #fffefa;
-      --canvas: #f5f3eb;
-      --green: #315d49;
-      --green-dark: #244a39;
-      --green-soft: #e8efe8;
-      --amber: #a87539;
-      --amber-soft: #f8f0e2;
+      --ink: #203a33;
+      --muted: #77837a;
+      --line: #e5ded0;
+      --paper: #fffdf8;
+      --canvas: #f4efe4;
+      --green: #244b3d;
+      --green-dark: #17372f;
+      --green-soft: #e8eee5;
+      --amber: #a9844f;
+      --amber-soft: #f4ecdd;
       --red: #a94e44;
       --red-soft: #f9eae7;
       --shadow: 0 10px 34px rgba(35, 48, 39, .045);
-      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: "Avenir Next", Montserrat, "Century Gothic", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; min-width: 320px; background: radial-gradient(ellipse at 88% 0%, rgba(229, 236, 225, .52), transparent 34%), var(--canvas); color: var(--ink); }
+    body { margin: 0; min-width: 320px; background: radial-gradient(ellipse at 88% 0%, rgba(225, 232, 219, .58), transparent 34%), var(--canvas); color: var(--ink); }
     button, input, select { font: inherit; }
     button { cursor: pointer; }
     .app { min-height: 100vh; }
@@ -41,18 +41,22 @@
       display: flex; align-items: center; gap: 13px; width: 100%; padding: 11px 13px; border: 0;
       border-radius: 9px; color: #727a74; background: transparent; text-align: left; font-size: 13px; font-weight: 550;
     }
-    .nav button:hover { color: var(--green); background: #f6f8f5; }
+    .nav button:hover { color: var(--green); background: var(--green-soft); }
     .nav button.active { color: var(--green); background: var(--green-soft); font-weight: 700; }
     .nav svg { width: 17px; height: 17px; flex: none; }
     .nav-count { margin-left: auto; padding: 2px 7px; border-radius: 20px; color: #fff; background: var(--green); font-size: 10px; }
     main { max-width: 1510px; min-height: 100vh; margin: 0 auto; padding: 0 46px 50px; }
-    .topbar { position: sticky; top: 0; z-index: 30; isolation: isolate; display: flex; align-items: center; justify-content: space-between; width: 100vw; height: 82px; margin-left: calc(50% - 50vw); padding: 0 max(46px, calc((100vw - 1418px) / 2)); border-bottom: 1px solid var(--line); background: #000; }
-    .topbar::before { position: absolute; inset: 0; z-index: -1; background: url("assets/schweden-landschaft.jpg") center 48% / cover no-repeat; content: ""; opacity: .6; }
+    .topbar { position: sticky; top: 0; z-index: 30; isolation: isolate; display: flex; align-items: center; justify-content: space-between; width: 100vw; height: 82px; margin-left: calc(50% - 50vw); padding: 0 max(46px, calc((100vw - 1418px) / 2)); border-bottom: 1px solid rgba(255,253,248,.2); background: var(--green-dark); }
+    .topbar::before { position: absolute; inset: 0; z-index: -1; background: url("assets/schweden-landschaft.jpg") center 48% / cover no-repeat; content: ""; opacity: .5; }
     .breadcrumb { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 13px; }
-    .breadcrumb-home { display: grid; place-items: center; width: 31px; height: 31px; flex: none; padding: 0; border: 1px solid transparent; border-radius: 8px; background: transparent; }
+    .breadcrumb-home { display: grid; place-items: center; width: 40px; height: 40px; flex: none; padding: 0; border: 1px solid transparent; border-radius: 8px; background: transparent; }
     .breadcrumb-home:hover, .breadcrumb-home:focus-visible { border-color: var(--line); background: rgba(255,254,250,.8); outline: none; }
-    .breadcrumb-home svg { width: 23px; height: 23px; }
-    .breadcrumb-brand { color: white; font-size: 24px; font-weight: 850; letter-spacing: 1px; }
+    .breadcrumb-home svg { width: 38px; height: 35px; }
+    .brand-lockup { display: inline-flex; align-items: center; gap: 9px; margin-left: 2px; color: #fff9eb; }
+    .brand-symbol { width: 38px; height: 35px; flex: none; }
+    .brand-wordmark { display: flex; flex-direction: column; gap: 1px; }
+    .breadcrumb-brand { color: #fff9eb; font-family: "Avenir Next", Montserrat, "Century Gothic", sans-serif; font-size: 19px; font-weight: 500; letter-spacing: .27em; line-height: 1.15; }
+    .brand-region { padding-left: 2px; color: #e3d6bd; font-size: 9px; font-weight: 500; letter-spacing: .04em; line-height: 1; }
     .breadcrumb-separator, .breadcrumb #breadcrumb { display: none; }
     .top-actions { display: flex; align-items: center; gap: 12px; }
     .notification-wrap { position: relative; }
@@ -91,7 +95,7 @@
     .stat[data-page] { cursor: pointer; transition: transform .16s ease, box-shadow .16s ease; }
     .stat[data-page]:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(35,48,39,.09); }
     .stat > :not(.stat-art) { position: relative; z-index: 1; }
-    .stat-art { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; opacity: .2; pointer-events: none; }
+    .stat-art { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; opacity: .5; pointer-events: none; }
     .stat-head { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 11px; }
     .stat-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; color: var(--green); background: var(--green-soft); }
     button.stat-icon { padding: 0; border: 0; cursor: pointer; }
@@ -109,32 +113,36 @@
     .card-caption { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
     .text-btn { padding: 4px 0; border: 0; color: var(--green); background: none; font-size: 11px; font-weight: 700; }
     .task-list { padding: 0 19px; }
-    .task-row { display: flex; align-items: center; gap: 12px; min-height: 67px; border-bottom: 1px solid #f0f1ee; }
-    .task-row[data-edit-task] { cursor: pointer; }
-    .task-row[data-edit-task]:hover .task-name { color: var(--green); }
+    .task-row { display: flex; align-items: center; gap: 12px; min-height: 67px; border-bottom: 1px solid var(--line); }
+    .task-name:hover { color: var(--green); }
     .task-row:last-child { border-bottom: 0; }
     .check {
       display: grid; place-items: center; width: 18px; height: 18px; flex: none; padding: 0;
-      border: 1.5px solid #cbd1ca; border-radius: 6px; color: white; background: white;
+      border: 1.5px solid #c5cec4; border-radius: 6px; color: white; background: white;
     }
     .check:hover { border-color: var(--green); }
     .check.done { border-color: var(--green); background: var(--green); }
     .check svg { width: 12px; height: 12px; }
     .task-main { min-width: 0; flex: 1; }
     .task-name { display: block; max-width: 100%; overflow: hidden; margin: 0 0 5px; padding: 0; border: 0; color: var(--ink); background: transparent; font-size: 12px; font-weight: 650; text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
-    .task-name:focus-visible { outline: 2px solid #9db9a5; outline-offset: 2px; }
+    .task-name:focus-visible { outline: 2px solid #819887; outline-offset: 2px; }
     .task-name.completed { color: #9ba19c; text-decoration: line-through; }
     .task-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; color: var(--muted); font-size: 10px; }
-    .task-tag, .status { display: inline-flex; align-items: center; padding: 4px 7px; border-radius: 5px; color: #64716a; background: #f1f3f0; font-size: 9px; font-weight: 650; }
+    .task-tag, .status { display: inline-flex; align-items: center; padding: 4px 7px; border-radius: 5px; color: #617267; background: #edf0e9; font-size: 9px; font-weight: 650; }
     .task-tag.urgent { color: var(--red); background: var(--red-soft); }
     .task-tag.soon { color: var(--amber); background: var(--amber-soft); }
     .task-due { min-width: 70px; color: #727a74; font-size: 10px; text-align: right; }
     .empty { padding: 28px 16px; color: var(--muted); font-size: 12px; text-align: center; }
-    .appointment { display: flex; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #f0f1ee; }
+    .appointment { display: flex; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
     .appointment:last-child { border-bottom: 0; }
-    button.appointment { width: 100%; border: 0; border-bottom: 1px solid #f0f1ee; color: inherit; background: transparent; text-align: left; cursor: pointer; }
+    button.appointment { width: 100%; border: 0; border-bottom: 1px solid var(--line); color: inherit; background: transparent; text-align: left; cursor: pointer; }
     button.appointment:hover .appointment-info strong, button.appointment:focus-visible .appointment-info strong { color: var(--green); }
     button.appointment:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+    .appointment-title-button { display: block; max-width: 100%; margin: 0 0 4px; padding: 0; border: 0; color: var(--ink); background: transparent; font-size: 11px; font-weight: 700; text-align: left; }
+    .appointment-title-button:hover, .appointment-title-button:focus-visible { color: var(--green); text-decoration: underline; }
+    .appointment-title-button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+    .appointment.past { opacity: .52; filter: grayscale(1); }
+    .appointment.past .appointment-info small { color: #777; }
     .date-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 42px; height: 45px; flex: none; border-radius: 8px; color: var(--green); background: var(--green-soft); }
     .date-tile b { font-size: 16px; line-height: 1.1; }
     .date-tile small { margin-top: 3px; font-size: 8px; font-weight: 700; text-transform: uppercase; }
@@ -142,7 +150,7 @@
     .appointment-info strong { display: block; margin-bottom: 4px; font-size: 11px; }
     .appointment-info small { display: block; color: var(--muted); font-size: 10px; }
     .house-service-list { padding: 0 18px; }
-    .house-service-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid #f0f1ee; color: inherit; background: transparent; text-align: left; cursor: pointer; }
+    .house-service-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid var(--line); color: inherit; background: transparent; text-align: left; cursor: pointer; }
     .house-service-row:last-child { border-bottom: 0; }
     .house-service-row:hover .house-service-name { color: var(--green); }
     .house-service-row:focus-visible { outline: 2px solid #9db9a5; outline-offset: 2px; }
@@ -151,7 +159,7 @@
     .house-service-partners { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; font-weight: 400; }
     .house-service-row .inspection-status-badge { flex: none; margin-top: 0; }
     .provider-card { display: flex; align-items: center; gap: 11px; padding: 13px 18px; }
-    .provider-avatar { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 10px; color: #725637; background: #f2eadf; font-size: 10px; font-weight: 750; }
+    .provider-avatar { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 10px; color: #775c35; background: #f1e8d7; font-size: 10px; font-weight: 750; }
     .provider-info { flex: 1; }
     .provider-info strong { display: block; font-size: 11px; }
     .provider-info small { color: var(--muted); font-size: 9px; }
@@ -161,14 +169,14 @@
     .provider-filters .search input { width: 100%; }
     .provider-filters .search svg { top: 31px; }
     .provider-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; padding: 16px; }
-    .provider-result { position: relative; display: flex; flex-direction: column; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    .provider-result { position: relative; display: flex; flex-direction: column; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
     .provider-result-top { display: flex; align-items: flex-start; gap: 10px; padding-right: 28px; }
     .provider-result .provider-avatar { width: 37px; height: 37px; }
     .provider-result h3 { margin: 1px 0 4px; font-size: 12px; }
     .provider-result p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
     .favorite-btn { display: grid; place-items: center; width: 29px; height: 29px; padding: 0; border: 1px solid var(--line); border-radius: 8px; color: #858c86; background: #fff; }
     .favorite-btn svg { width: 15px; height: 15px; }
-    .assign-provider-btn { display: grid; place-items: center; width: 25px; height: 25px; flex: none; margin-left: 7px; padding: 0; border: 1px solid #cbd1ca; border-radius: 7px; color: #68746b; background: white; cursor: pointer; }
+    .assign-provider-btn { display: grid; place-items: center; width: 25px; height: 25px; flex: none; margin-left: 7px; padding: 0; border: 1px solid #c5cec4; border-radius: 7px; color: #68746b; background: white; cursor: pointer; }
     .assign-provider-btn svg { width: 15px; height: 15px; }
     .assign-provider-btn.selected { border-color: var(--green); color: white; background: var(--green); }
     .assign-provider-btn:hover, .assign-provider-btn:focus-visible { outline: 2px solid #9db9a5; outline-offset: 2px; }
@@ -179,10 +187,10 @@
     .provider-town { color: #626c64; font-size: 10px; }
     .provider-type { display: inline-block; padding: 4px 7px; border-radius: 5px; color: var(--green); background: var(--green-soft); font-size: 9px; font-weight: 700; }
     .provider-type.renovation { color: #805526; background: var(--amber-soft); }
-    .provider-result-footer { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); }
-    .provider-location-distance { display: flex; align-items: center; gap: 10px; min-width: 0; color: #626c64; font-size: 10px; }
+    .provider-result-footer { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-top: auto; padding-top: 10px; }
+    .provider-location-distance { display: flex; align-items: center; gap: 10px; min-width: 0; padding-top: 8px; border-top: 1px solid var(--line); color: #626c64; font-size: 10px; }
     .provider-location-distance .provider-distance { padding-left: 10px; border-left: 1px solid var(--line); white-space: nowrap; }
-    .provider-result-footer .provider-contact-links { justify-content: flex-start; }
+    .provider-result-footer .provider-contact-links { justify-content: flex-end; }
     .provider-contact-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 10px; min-width: 0; }
     .provider-source { color: var(--green); font-size: 10px; font-weight: 700; text-decoration: none; }
     .provider-source:hover { text-decoration: underline; }
@@ -295,6 +303,8 @@
     .calendar-day { position: relative; min-height: 72px; padding: 8px; border: 1px solid #eef0ec; border-radius: 8px; color: var(--ink); background: white; text-align: left; }
     .calendar-day:hover { border-color: #b8c8ba; background: #f8faf7; }
     .calendar-day.outside { color: #aab0aa; background: #f8f9f7; }
+    .calendar-day.past-day { opacity: .48; color: #858985; background: #f1f2f0; }
+    .calendar-day.past-day .calendar-date-button:disabled { color: inherit; cursor: not-allowed; }
     .calendar-day.selected { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
     .calendar-date-button { display: block; width: 100%; margin: 0; padding: 0; border: 0; color: inherit; background: transparent; text-align: left; }
     .calendar-day.today .calendar-day-number { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: white; background: var(--green); }
@@ -329,9 +339,17 @@
     .calendar-event.booking .calendar-event-time, .calendar-event.booking strong { color: #a61b1b; }
     .calendar-event strong { display: block; font-size: 11px; }
     .calendar-event small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
-    .booking-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: 16px; }
+    .booking-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
     .booking-calendar .calendar-day { min-height: 82px; padding: 6px; cursor: default; }
     .booking-calendar .calendar-date-button { cursor: pointer; }
+    .booking-calendar .calendar-day.past-day { opacity: .48; color: #858985; background: #f1f2f0; }
+    .booking-calendar .calendar-day.past-day.in-range { border-color: #d9dcda; background: #f1f2f0; }
+    .booking-calendar .calendar-day.past-day.range-start, .booking-calendar .calendar-day.past-day.range-end { border-color: #c6cac7; box-shadow: inset 0 0 0 1px #c6cac7; }
+    .booking-calendar .calendar-date-button:disabled { cursor: not-allowed; }
+    .booking-inline-calendar { margin: 16px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+    .booking-inline-calendar .card-head { padding: 13px 15px; }
+    .booking-inline-calendar .calendar-grid { padding: 10px; }
+    .booking-inline-calendar .calendar-legend { padding: 0 14px 12px; }
     .booking-calendar .calendar-day.in-range { border-color: #bfd0c0; background: #edf3ec; }
     .booking-calendar .calendar-day.booked-range { border-color: #edc2c2; background: #fff0f0; }
     .booking-calendar .calendar-day.range-start, .booking-calendar .calendar-day.range-end { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
@@ -346,6 +364,8 @@
     .booking-row-info strong, .booking-row-info small { display: block; }
     .booking-row-info strong { font-size: 11px; }
     .booking-row-info small { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .booking-row.past { opacity: .55; filter: grayscale(1); }
+    .booking-row.past .booking-row-info small.checkout-status { color: #777; font-weight: 650; }
     .booking-row-actions { display: flex; gap: 6px; }
     .booking-row-actions button { padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: white; font-size: 9px; }
     .booking-row-actions button:hover { border-color: #b8c8ba; color: var(--green); }
@@ -379,8 +399,8 @@
       .topbar { padding-right: 13px; padding-left: 13px; }
       .notification-panel { position: fixed; top: 75px; right: 13px; left: 13px; width: auto; max-height: calc(100vh - 95px); }
       .breadcrumb { gap: 6px; font-size: 11px; }
-      .breadcrumb-home { width: 27px; height: 27px; }
-      .breadcrumb-home svg { width: 20px; height: 20px; }
+      .breadcrumb-home { width: 34px; height: 36px; }
+      .breadcrumb-home svg { width: 34px; height: 30px; }
       .breadcrumb-brand { font-size: 19px; }
       .top-actions { gap: 7px; }
       .welcome { align-items: flex-start; flex-direction: column; gap: 15px; }
@@ -423,7 +443,7 @@
   <div class="app">
     <main>
       <header class="topbar">
-        <div class="breadcrumb"><button class="breadcrumb-home" data-page="dashboard" aria-label="Zur Übersicht" title="Zur Übersicht"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 10.2 12 2.8l9.5 7.4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 9.2V21h14V9.2L12 3.8 5 9.2Z" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/><path d="M10 21v-6h4v6M7.5 11h2.3v2.3H7.5zM14.2 11h2.3v2.3h-2.3z" fill="#000" stroke="#000" stroke-width=".7"/></svg></button><span class="breadcrumb-brand">HUSORA</span><span class="breadcrumb-separator" aria-hidden="true">/</span><b id="breadcrumb">Übersicht</b></div>
+        <div class="breadcrumb"><button class="breadcrumb-home" data-page="dashboard" aria-label="Zur Übersicht" title="Zur Übersicht"><svg viewBox="0 0 42 36" aria-hidden="true"><path d="M3 19 16 7l13 12M6 17v14h19V17M11 23h3v3h-3zm7 0h3v3h-3z" fill="none" stroke="#fff9eb" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3"/><path d="M34 2 29 10h3l-5 6h4l-4 7h6v8h3v-8h6l-4-7h4l-5-6h3z" fill="#b9955f"/></svg></button><span class="brand-lockup"><span class="brand-wordmark"><span class="breadcrumb-brand">HUSORA</span><span class="brand-region">Ditt hem i Sverige</span></span></span><span class="breadcrumb-separator" aria-hidden="true">/</span><b id="breadcrumb">Übersicht</b></div>
         <div class="top-actions">
           <div class="notification-wrap">
             <button class="icon-btn" id="notify-button" aria-label="Dringende Aufgaben" title="Dringende Aufgaben" aria-expanded="false" aria-controls="notification-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="dot"></span></button>
@@ -752,6 +772,9 @@
       tasks = initialTasks;
     }
     let currentPage = 'dashboard';
+    let lastRenderedPage = currentPage;
+    const previousPageHistory = [];
+    let returningToPreviousPage = false;
     let profileData = { name: 'Max Mustermann', username: 'max.mustermann', email: '' };
     try {
       const savedProfile = localStorage.getItem('stugliv-profile');
@@ -1044,7 +1067,7 @@
     function taskRow(task) {
       const priority = task.priority === 'urgent' ? 'Dringend' : task.priority === 'soon' ? 'Wichtig' : 'Aufgabe';
       const tagClass = task.priority === 'urgent' ? 'urgent' : task.priority === 'soon' ? 'soon' : '';
-      return `<div class="task-row" data-edit-task="${task.id}">
+      return `<div class="task-row">
         <button class="check ${task.done ? 'done' : ''}" data-toggle="${task.id}" aria-label="${task.done ? 'Als offen markieren' : 'Als erledigt markieren'}">${task.done ? icon('check') : ''}</button>
         <div class="task-main"><button class="task-name ${task.done ? 'completed' : ''}" type="button" data-edit-task="${task.id}" aria-label="Aufgabe bearbeiten: ${escapeHtml(task.title)}">${escapeHtml(task.title)}</button><div class="task-meta"><span>${escapeHtml(task.property)}</span><span class="task-tag ${tagClass}">${priority}</span></div></div>
         <div class="task-due">${fmtDate(task.date)}</div>
@@ -1079,6 +1102,15 @@
       weekEnd.setDate(weekEnd.getDate() + 7);
       const upcomingChanges = [
         ...activeGuestChanges(),
+        ...tasks.filter((task) => !task.done && task.date >= today && task.date <= localDateKey(weekEnd)).map((task) => ({
+          title: task.title,
+          property: task.property,
+          date: task.date,
+          time: '',
+          detail: task.priority === 'urgent' ? 'Dringende Serviceaufgabe' : task.priority === 'soon' ? 'Wichtige Serviceaufgabe' : 'Serviceaufgabe',
+          type: 'task',
+          taskId: task.id
+        })),
         ...bookings.filter((booking) => booking.startDate >= today && booking.startDate <= localDateKey(weekEnd)).map((booking) => ({
           title: `Check-in · ${booking.guestName}`,
           property: properties.find((property) => property.id === booking.propertyId)?.name || 'Ferienhaus',
@@ -1089,6 +1121,19 @@
           bookingId: booking.id
         }))
       ];
+      const pastBookings = bookings
+        .filter((booking) => booking.endDate < today)
+        .sort((a, b) => b.endDate.localeCompare(a.endDate))
+        .map((booking) => ({
+          title: `Check-in · ${booking.guestName}`,
+          property: properties.find((property) => property.id === booking.propertyId)?.name || 'Ferienhaus',
+          date: booking.startDate,
+          detail: 'Gast hat ausgecheckt',
+          time: '',
+          bookingId: booking.id,
+          isPast: true
+        }));
+      const dashboardBookings = [...upcomingChanges, ...pastBookings];
       const currentInspections = properties.filter((property) => inspectionIsCurrent(property.id)).length;
       const firstName = profileData.name.trim().split(/\s+/)[0] || 'Willkommen';
       return `<div class="welcome"><div><p class="eyebrow">Husora · Dein Schweden-Portfolio · ${fmtLongDate()}</p><h1>Guten Tag, ${escapeHtml(firstName)} <span aria-hidden="true">☀️</span></h1><p class="subtitle">Buchungen, Stugapflege und Serviceeinsätze für deine Ferienhäuser.</p></div><button class="primary-btn" data-action="new-task">${icon('plus')} Aufgabe planen</button></div>
@@ -1102,10 +1147,15 @@
           <section class="card"><div class="card-head"><div><h2 class="card-title">Service vor Ort</h2><p class="card-caption">${open.length} offene Aufgaben an deinen schwedischen Ferienhäusern</p></div><button class="text-btn" data-page="tasks">Alle Aufgaben →</button></div><div class="task-list">${open.length ? open.slice(0, 4).map(taskRow).join('') : '<div class="empty">Alles erledigt — großartig!</div>'}</div></section>
           <div>
             <section class="card"><div class="card-head"><div><h2 class="card-title">Nächste Buchungen</h2><p class="card-caption">Anreise, Endreinigung und Schlüssel</p></div><button class="text-btn" data-page="bookings">Buchungen →</button></div>
-              ${upcomingChanges.length ? upcomingChanges.map((event) => {
-                const appointment = `<div class="date-tile"><b>${fmtDate(event.date).split(' ')[0]}</b><small>${fmtDate(event.date).split(' ')[1]}</small></div><div class="appointment-info"><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(event.detail)} · ${escapeHtml(event.time)}</small></div>`;
+              ${dashboardBookings.length ? dashboardBookings.map((event) => {
+                const title = event.taskId
+                  ? `<button type="button" class="appointment-title-button" data-edit-task="${event.taskId}" aria-label="Serviceaufgabe bearbeiten: ${escapeHtml(event.title)}">${escapeHtml(event.title)}</button>`
+                  : `<strong>${escapeHtml(event.title)}</strong>`;
+                const appointment = `<div class="date-tile"><b>${fmtDate(event.date).split(' ')[0]}</b><small>${fmtDate(event.date).split(' ')[1]}</small></div><div class="appointment-info">${title}<small>${escapeHtml(event.isPast ? 'Gast hat ausgecheckt' : [event.detail, event.time].filter(Boolean).join(' · '))}</small></div>`;
                 return event.bookingId
-                  ? `<button type="button" class="appointment" data-edit-booking="${escapeHtml(event.bookingId)}" aria-label="Buchung bearbeiten: ${escapeHtml(event.title)}, ${escapeHtml(event.date)}">${appointment}</button>`
+                  ? `<button type="button" class="appointment ${event.isPast ? 'past' : ''}" data-edit-booking="${escapeHtml(event.bookingId)}" aria-label="${event.isPast ? 'Vergangene Buchung, Gast hat ausgecheckt. Buchung bearbeiten' : 'Buchung bearbeiten'}: ${escapeHtml(event.title)}, ${escapeHtml(event.date)}">${appointment}</button>`
+                  : event.taskId
+                    ? `<div class="appointment">${appointment}</div>`
                   : `<div class="appointment">${appointment}</div>`;
               }).join('') : '<div class="empty">Für deine Ferienhäuser sind keine Buchungen eingetragen.</div>'}
             </section>
@@ -1193,7 +1243,7 @@
               : `<span class="calendar-event-chip">${label}</span>`;
         }).join('');
         const moreEvents = dayEvents.length > maxVisible ? `<span class="calendar-event-chip">+${dayEvents.length - maxVisible} weitere</span>` : '';
-        cells.push(`<div class="calendar-day ${calendarView === 'month' && dayDate.getMonth() !== month ? 'outside' : ''} ${dateKey === calendarSelectedDate ? 'selected' : ''} ${dateKey === todayKey ? 'today' : ''}" data-calendar-date="${dateKey}"><button type="button" class="calendar-date-button" data-calendar-date="${dateKey}" aria-label="${escapeHtml(new Intl.DateTimeFormat('de-DE', { dateStyle: 'full' }).format(dayDate))}${dayEvents.length ? `, ${dayEvents.length} Termine` : ''}" aria-pressed="${dateKey === calendarSelectedDate}"><span class="calendar-day-number">${dayDate.getDate()}</span></button>${eventChips}${moreEvents}</div>`);
+        cells.push(`<div class="calendar-day ${calendarView === 'month' && dayDate.getMonth() !== month ? 'outside' : ''} ${dateKey < todayKey ? 'past-day' : ''} ${dateKey === calendarSelectedDate ? 'selected' : ''} ${dateKey === todayKey ? 'today' : ''}" data-calendar-date="${dateKey}"><button type="button" class="calendar-date-button" data-calendar-date="${dateKey}" aria-label="${escapeHtml(new Intl.DateTimeFormat('de-DE', { dateStyle: 'full' }).format(dayDate))}${dayEvents.length ? `, ${dayEvents.length} Termine` : ''}" aria-pressed="${dateKey === calendarSelectedDate}"><span class="calendar-day-number">${dayDate.getDate()}</span></button>${eventChips}${moreEvents}</div>`);
       }
       const selectedLabel = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${calendarSelectedDate}T12:00:00`));
       return `<div class="welcome"><div><p class="eyebrow">Planung & Buchungen</p><h1>Kalender</h1><p class="subtitle">Buchungen und datierte Serviceaufgaben im Monatsüberblick.</p></div></div>
@@ -1224,6 +1274,7 @@
       for (let index = 0; index < 42; index++) {
         const dayDate = new Date(year, month, index - firstWeekday + 1, 12);
         const dateKey = localDateKey(dayDate);
+        const isPast = dateKey < todayKey;
         const draftRange = bookingStartDate && dateKey >= bookingStartDate && (!bookingEndDate || dateKey <= bookingEndDate);
         const bookedRange = bookings.some((booking) => booking.propertyId === propertyId
           && dateKey >= booking.startDate && dateKey < booking.endDate);
@@ -1238,8 +1289,8 @@
         }).join('');
         const selected = dateKey === bookingStartDate || dateKey === bookingEndDate;
         const dayLabel = new Intl.DateTimeFormat('de-DE', { dateStyle: 'full' }).format(dayDate);
-        cells.push(`<div class="calendar-day booking-calendar-day ${dayDate.getMonth() !== month ? 'outside' : ''} ${dateKey === todayKey ? 'today' : ''} ${draftRange || bookedRange ? 'in-range' : ''} ${bookedRange ? 'booked-range' : ''} ${rangeStart ? 'range-start' : ''} ${rangeEnd ? 'range-end' : ''}">
-          <button type="button" class="calendar-date-button" data-booking-date="${dateKey}" aria-label="${escapeHtml(dayLabel)}${selected ? ', ausgewählt' : ''}" aria-pressed="${selected}"><span class="calendar-day-number">${dayDate.getDate()}</span></button>${eventChips}</div>`);
+        cells.push(`<div class="calendar-day booking-calendar-day ${dayDate.getMonth() !== month ? 'outside' : ''} ${isPast ? 'past-day' : ''} ${dateKey === todayKey ? 'today' : ''} ${draftRange || bookedRange ? 'in-range' : ''} ${bookedRange ? 'booked-range' : ''} ${rangeStart ? 'range-start' : ''} ${rangeEnd ? 'range-end' : ''}">
+          <button type="button" class="calendar-date-button" data-booking-date="${dateKey}" aria-label="${escapeHtml(dayLabel)}${isPast ? ', vergangen, nicht auswählbar' : selected ? ', ausgewählt' : ''}" aria-pressed="${selected}" ${isPast ? 'disabled' : ''}><span class="calendar-day-number">${dayDate.getDate()}</span></button>${eventChips}</div>`);
       }
       const dateSummary = bookingStartDate && bookingEndDate
         ? `${fmtDate(bookingStartDate)} – ${fmtDate(bookingEndDate)} · ${Math.round((new Date(`${bookingEndDate}T12:00:00`) - new Date(`${bookingStartDate}T12:00:00`)) / 86400000)} Nächte`
@@ -1247,16 +1298,16 @@
       const sortedBookings = [...bookings].sort((a, b) => a.startDate.localeCompare(b.startDate));
       return `<div class="welcome"><div><p class="eyebrow">Buchungsplanung · Schweden</p><h1>Buchung</h1><p class="subtitle">Buchungszeitraum im Kalender auswählen und Ankunftsdaten für deine Ferienhäuser verwalten.</p></div><button class="primary-btn" data-action="new-booking">${icon('plus')} Neue Buchung</button></div>
         <div class="booking-layout">
-          <section class="card booking-calendar"><div class="card-head"><div><h2 class="card-title">Belegungskalender</h2><p class="card-caption">Anreise und Abreise durch Auswahl von zwei Tagen festlegen</p></div><div class="calendar-toolbar"><button type="button" class="calendar-nav" data-booking-month="-1" aria-label="Vorheriger Monat">‹</button><strong>${escapeHtml(monthTitle)}</strong><button type="button" class="calendar-nav" data-booking-month="1" aria-label="Nächster Monat">›</button></div></div>
-            <div class="calendar-grid">${dayLabels.map((label) => `<div class="calendar-weekday">${label}</div>`).join('')}${cells.join('')}</div>
-            <div class="calendar-legend"><span><i class="calendar-dot booking"></i>Gebuchte Übernachtung</span><span><i class="calendar-dot task"></i>Abreise</span></div>
-          </section>
           <section class="card"><div class="card-head"><div><h2 class="card-title">${editingBookingId ? 'Buchung bearbeiten' : 'Buchung erfassen'}</h2><p class="card-caption">Gastangaben für die Buchung</p></div></div>
             <form id="booking-form" class="booking-form"><p class="booking-hint">Wähle im Kalender zuerst den Anreisetag und anschließend den Abreisetag. Der Abreisetag ist nicht mehr als Übernachtung belegt.</p>
               <div class="booking-range-summary">${escapeHtml(dateSummary)}</div>
               <input type="hidden" name="startDate" value="${escapeHtml(bookingStartDate)}"><input type="hidden" name="endDate" value="${escapeHtml(bookingEndDate)}">
               <div class="booking-form-grid">
                 <label class="full"><span class="form-label">Ferienhaus</span><select class="form-control" name="propertyId" required ${properties.length ? '' : 'disabled'}>${properties.map((property) => `<option value="${escapeHtml(property.id)}" ${property.id === propertyId ? 'selected' : ''}>${escapeHtml(property.name)}</option>`).join('')}</select></label>
+                <div class="full booking-inline-calendar"><div class="card-head"><div><h2 class="card-title">Belegungskalender</h2><p class="card-caption">Anreise und Abreise durch Auswahl von zwei Tagen festlegen</p></div><div class="calendar-toolbar"><button type="button" class="calendar-nav" data-booking-month="-1" aria-label="Vorheriger Monat">‹</button><strong>${escapeHtml(monthTitle)}</strong><button type="button" class="calendar-nav" data-booking-month="1" aria-label="Nächster Monat">›</button></div></div>
+                  <div class="calendar-grid">${dayLabels.map((label) => `<div class="calendar-weekday">${label}</div>`).join('')}${cells.join('')}</div>
+                  <div class="calendar-legend"><span><i class="calendar-dot booking"></i>Gebuchte Übernachtung</span><span><i class="calendar-dot task"></i>Abreise</span></div>
+                </div>
                 <label class="full"><span class="form-label">Name des Gasts</span><input class="form-control" name="guestName" required maxlength="100" autocomplete="name" value="${escapeHtml(bookingDraft.guestName)}" placeholder="Vor- und Nachname"></label>
                 <label><span class="form-label">Personen</span><input class="form-control" name="guestCount" type="number" min="1" max="30" step="1" required value="${escapeHtml(bookingDraft.guestCount)}"></label>
                 <label><span class="form-label">Ankunftszeit</span><input class="form-control" name="arrivalTime" type="time" required value="${escapeHtml(bookingDraft.arrivalTime)}"></label>
@@ -1270,8 +1321,9 @@
           ${sortedBookings.length ? sortedBookings.map((booking) => {
             const propertyName = properties.find((property) => property.id === booking.propertyId)?.name || 'Ferienhaus entfernt';
             const personCount = Number(booking.guestCount) || 1;
+            const checkedOut = booking.endDate < todayKey;
             const details = `${propertyName} · ${fmtDate(booking.startDate)} – ${fmtDate(booking.endDate)} · ${personCount} ${personCount === 1 ? 'Person' : 'Personen'} · Ankunft ${booking.arrivalTime || '—'}`;
-            return `<div class="booking-row"><div class="booking-row-info"><strong>${escapeHtml(booking.guestName)}</strong><small>${escapeHtml(details)}</small>${booking.notes ? `<small>${escapeHtml(booking.notes)}</small>` : ''}</div><div class="booking-row-actions"><button type="button" data-edit-booking="${escapeHtml(booking.id)}" aria-label="Buchung von ${escapeHtml(booking.guestName)} bearbeiten">Bearbeiten</button><button type="button" data-delete-booking="${escapeHtml(booking.id)}" aria-label="Buchung von ${escapeHtml(booking.guestName)} löschen">Löschen</button></div></div>`;
+            return `<div class="booking-row ${checkedOut ? 'past' : ''}"><div class="booking-row-info"><strong>${escapeHtml(booking.guestName)}</strong><small>${escapeHtml(details)}</small>${checkedOut ? '<small class="checkout-status">Gast hat ausgecheckt</small>' : ''}${booking.notes ? `<small>${escapeHtml(booking.notes)}</small>` : ''}</div><div class="booking-row-actions"><button type="button" data-edit-booking="${escapeHtml(booking.id)}" aria-label="Buchung von ${escapeHtml(booking.guestName)} bearbeiten">Bearbeiten</button><button type="button" data-delete-booking="${escapeHtml(booking.id)}" aria-label="Buchung von ${escapeHtml(booking.guestName)} löschen">Löschen</button></div></div>`;
           }).join('') : '<div class="empty">Noch keine Buchungen erfasst. Wähle den Zeitraum im Kalender und trage die Gastangaben ein.</div>'}
         </section>`;
     }
@@ -1348,7 +1400,7 @@
             <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-favorite="${escapeHtml(provider.id)}" aria-label="${isFavorite ? 'Aus Favoriten entfernen' : 'Als Favorit speichern'}" aria-pressed="${isFavorite}" title="${isFavorite ? 'Aus Favoriten entfernen' : 'Als Favorit speichern'}"><svg viewBox="0 0 24 24" fill="${isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/></svg></button>
           </div>
           <div class="provider-details"><span class="provider-type ${provider.category === 'renovation' ? 'renovation' : ''}">${categoryLabel}</span>${provider.specialty ? `<span class="provider-specialty">${escapeHtml(provider.specialty)}</span>` : ''}</div>
-          <div class="provider-result-footer"><div class="provider-location-distance"><span class="provider-town">${escapeHtml(provider.town)}</span><span class="provider-distance">Entfernung ${provider.distances[property.id]} km</span></div><div class="provider-contact-links">${providerContactLinks(provider)}</div></div>
+          <div class="provider-result-footer"><div class="provider-contact-links">${providerContactLinks(provider)}</div><div class="provider-location-distance"><span class="provider-town">${escapeHtml(provider.town)}</span><span class="provider-distance">Entfernung ${provider.distances[property.id]} km</span></div></div>
         </article>`;
       }).join('');
       return `<div class="welcome"><div><p class="eyebrow">Schwedische Betriebe vor Ort</p><h1>Servicepartner finden</h1><p class="subtitle">Hausservice und Sanierungsunternehmen im Umkreis deiner Ferienhäuser.</p></div></div>
@@ -1517,6 +1569,15 @@
     function render() {
       const pages = { dashboard, tasks: tasksPage, properties: propertiesPage, propertyDetail: propertyDetailPage, providers: providersPage, costs: costsPage, inspections: inspectionsPage, calendar: calendarPage, bookings: bookingsPage, profile: profilePage };
       const labels = { dashboard: 'Übersicht', tasks: 'Serviceaufgaben', properties: 'Ferienhäuser', propertyDetail: 'Objektübersicht', providers: 'Servicepartner', costs: 'Jahreskosten', inspections: 'Hauskontrolle', calendar: 'Kalender', bookings: 'Buchung', profile: 'Benutzer' };
+      if (currentPage !== lastRenderedPage) {
+        if (returningToPreviousPage) {
+          returningToPreviousPage = false;
+        } else {
+          previousPageHistory.push(lastRenderedPage);
+          if (previousPageHistory.length > 30) previousPageHistory.shift();
+        }
+        lastRenderedPage = currentPage;
+      }
       document.getElementById('breadcrumb').textContent = labels[currentPage];
       document.getElementById('nav-count').textContent = tasks.filter((task) => !task.done).length;
       document.querySelectorAll('.nav [data-page]').forEach((button) => button.classList.toggle('active', button.dataset.page === currentPage || (currentPage === 'propertyDetail' && button.dataset.page === 'properties')));
@@ -1524,6 +1585,35 @@
       pageContent.innerHTML = pages[currentPage]();
       renderNotifications();
     }
+    let swipeStart = null;
+    pageContent.addEventListener('touchstart', (event) => {
+      if (!window.matchMedia('(max-width: 760px)').matches || event.touches.length !== 1) {
+        swipeStart = null;
+        return;
+      }
+      const target = event.target;
+      if (target.closest('button, a, input, select, textarea, [contenteditable="true"], .calendar-grid, .provider-results, .task-list, .booking-inline-calendar')) {
+        swipeStart = null;
+        return;
+      }
+      const touch = event.touches[0];
+      swipeStart = { x: touch.clientX, y: touch.clientY };
+    }, { passive: true });
+    pageContent.addEventListener('touchend', (event) => {
+      if (!swipeStart || event.changedTouches.length !== 1) {
+        swipeStart = null;
+        return;
+      }
+      const touch = event.changedTouches[0];
+      const deltaX = touch.clientX - swipeStart.x;
+      const deltaY = touch.clientY - swipeStart.y;
+      swipeStart = null;
+      if (deltaX > -70 || Math.abs(deltaX) < Math.abs(deltaY) * 1.4 || !previousPageHistory.length) return;
+      currentPage = previousPageHistory.pop();
+      returningToPreviousPage = true;
+      render();
+    }, { passive: true });
+    pageContent.addEventListener('touchcancel', () => { swipeStart = null; }, { passive: true });
     function toggleTask(id) {
       const task = tasks.find((item) => item.id === Number(id));
       if (!task) return;
@@ -1592,6 +1682,10 @@
       const bookingDateButton = event.target.closest('[data-booking-date]');
       if (bookingDateButton) {
         const selectedDate = bookingDateButton.dataset.bookingDate;
+        if (selectedDate < localDateKey(new Date())) {
+          showToast('Vergangene Tage können nicht für eine Buchung ausgewählt werden.');
+          return;
+        }
         if (!bookingStartDate || bookingEndDate || selectedDate <= bookingStartDate) {
           bookingStartDate = selectedDate;
           bookingEndDate = '';
@@ -1878,6 +1972,11 @@
         }
         if (!startDate || !endDate || endDate <= startDate) {
           showToast('Bitte im Kalender einen Anreise- und einen späteren Abreisetag auswählen.');
+          return;
+        }
+        const existingBooking = bookings.find((booking) => booking.id === editingBookingId);
+        if (startDate < localDateKey(new Date()) && (!existingBooking || existingBooking.startDate !== startDate || existingBooking.endDate !== endDate)) {
+          showToast('Eine neue Buchung kann nicht in der Vergangenheit beginnen.');
           return;
         }
         if (!guestName || !Number.isInteger(guestCount) || guestCount < 1 || guestCount > 30 || !arrivalTime) {
