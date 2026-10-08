@@ -203,6 +203,23 @@
     .cost-average { display: flex; flex-direction: column; justify-content: center; padding: 18px; }
     .cost-average span { color: var(--muted); font-size: 10px; }
     .cost-average strong { margin-top: 7px; font-size: 21px; }
+    .cost-chart-card { margin-bottom: 17px; }
+    .cost-chart-layout { display: grid; grid-template-columns: minmax(190px, 250px) minmax(0, 1fr); align-items: center; gap: 20px; padding: 16px 20px 20px; }
+    .cost-chart-visual { display: grid; place-items: center; min-width: 0; }
+    .cost-chart { display: block; width: min(100%, 230px); overflow: visible; }
+    .cost-chart-track { fill: none; stroke: #edf0eb; stroke-width: 34; }
+    .cost-chart-slice { fill: none; stroke-width: 34; stroke-linecap: butt; transform: rotate(-90deg); transform-origin: 100px 100px; animation: cost-slice-reveal .85s cubic-bezier(.2,.75,.25,1) var(--slice-delay) both; }
+    .cost-chart-center-total { fill: var(--ink); font-size: 12px; font-weight: 750; }
+    .cost-chart-center-caption { fill: var(--muted); font-size: 8px; }
+    @keyframes cost-slice-reveal { from { stroke-dasharray: 0 100; opacity: .45; } to { stroke-dasharray: var(--slice-dash) var(--slice-gap); opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .cost-chart-slice { animation: none; } }
+    .cost-chart-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 18px; margin: 0; padding: 0; list-style: none; }
+    .cost-chart-legend li { display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; align-items: center; gap: 7px; min-height: 35px; border-bottom: 1px solid #f0f1ee; }
+    .cost-chart-swatch { width: 8px; height: 8px; border-radius: 50%; }
+    .cost-chart-label { overflow: hidden; color: #48534b; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+    .cost-chart-values { display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }
+    .cost-chart-values strong { font-size: 9px; }
+    .cost-chart-values small { color: var(--muted); font-size: 8px; }
     .cost-list { padding: 0 18px; }
     .cost-item { display: flex; align-items: center; gap: 12px; min-height: 67px; border-bottom: 1px solid #f0f1ee; }
     .cost-item:last-child { border-bottom: 0; }
@@ -244,6 +261,15 @@
     .inspection-completion-date .form-label { margin: 0; }
     .inspection-completion-date input { max-width: 180px; }
     .inspection-history { padding: 12px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; line-height: 1.7; }
+    .inspection-archive-list { padding: 4px 18px 8px; }
+    .inspection-archive-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f0f1ee; }
+    .inspection-archive-row:last-child { border-bottom: 0; }
+    .inspection-archive-main { min-width: 0; }
+    .inspection-archive-main strong { display: block; font-size: 10px; }
+    .inspection-archive-main small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; }
+    .inspection-archive-actions { display: flex; flex: none; gap: 7px; }
+    .inspection-archive-actions .secondary-btn { min-height: 32px; padding: 0 10px; font-size: 10px; }
+    .inspection-archive-note { padding: 0 18px 13px; color: var(--muted); font-size: 9px; line-height: 1.5; }
     .inspection-status { padding: 11px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
     .section-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 20px 0 13px; }
     .search { position: relative; min-width: 200px; }
@@ -292,6 +318,40 @@
     .modal h2 { margin: 0; font-size: 18px; letter-spacing: -.4px; }
     .modal-head p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
     .close-btn { display: grid; place-items: center; width: 29px; height: 29px; border: 0; border-radius: 7px; color: #707970; background: #f4f5f2; }
+    .inspection-confirmation-modal { width: min(620px, 100%); max-height: 90vh; overflow-y: auto; }
+    .inspection-report-summary { margin: -4px 0 15px; color: #536057; font-size: 11px; line-height: 1.6; }
+    .inspection-report-house { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 16px; margin: 0 0 16px; padding: 14px; border: 1px solid var(--line); border-radius: 9px; background: #fbfaf6; }
+    .inspection-report-house div { min-width: 0; }
+    .inspection-report-house dt { color: var(--muted); font-size: 9px; }
+    .inspection-report-house dd { margin: 3px 0 0; font-size: 10px; font-weight: 650; overflow-wrap: anywhere; }
+    .inspection-report-list { max-height: 260px; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+    .inspection-report-list li { display: grid; grid-template-columns: 19px minmax(0, 1fr); gap: 8px; padding: 9px 0; border-bottom: 1px solid #edf0eb; }
+    .inspection-report-check { color: var(--green); font-weight: 800; }
+    .inspection-report-list strong { display: block; font-size: 10px; }
+    .inspection-report-list small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; line-height: 1.45; }
+    .inspection-confirmation-modal .form-actions { flex-wrap: wrap; }
+    .inspection-confirmation-modal [hidden] { display: none !important; }
+    .inspection-print-area { display: none; }
+    .inspection-print-page h1 { margin: 0 0 5px; font-size: 25px; }
+    .inspection-print-page h2 { margin: 22px 0 10px; font-size: 15px; }
+    .inspection-print-eyebrow { margin: 0 0 7px; color: #496451; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+    .inspection-print-meta { margin: 0; color: #58635a; font-size: 11px; }
+    .inspection-print-house { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 22px; margin: 0; padding: 14px; border: 1px solid #d9ded8; }
+    .inspection-print-house div { break-inside: avoid; }
+    .inspection-print-house dt { color: #67736a; font-size: 9px; }
+    .inspection-print-house dd { margin: 3px 0 0; font-size: 11px; font-weight: 650; }
+    .inspection-print-checklist { margin: 0; padding: 0; list-style: none; }
+    .inspection-print-checklist li { display: grid; grid-template-columns: 21px minmax(0, 1fr); gap: 8px; padding: 10px 0; border-bottom: 1px solid #e4e8e3; break-inside: avoid; }
+    .inspection-print-check { color: #244b3d; font-size: 12px; font-weight: 800; }
+    .inspection-print-checklist strong { display: block; font-size: 11px; }
+    .inspection-print-checklist small { display: block; margin-top: 4px; color: #576159; font-size: 9px; line-height: 1.5; }
+    @page { margin: 18mm; }
+    @media print {
+      body { min-width: 0; margin: 0; background: white; color: #203a33; font-family: Arial, sans-serif; }
+      body > :not(#inspection-print-area) { display: none !important; }
+      #inspection-print-area { display: block !important; }
+      main.inspection-print-page { display: block; max-width: none; min-height: 0; margin: 0; padding: 0; }
+    }
     .form-grid { display: grid; gap: 14px; }
     .property-modal { width: min(680px, 100%); max-height: 90vh; overflow-y: auto; }
     .property-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
@@ -425,6 +485,8 @@
     @media (max-width: 760px) {
       main { padding-right: 20px; padding-left: 20px; }
       .columns { grid-template-columns: 1fr; }
+      .cost-chart-layout { grid-template-columns: minmax(150px, 190px) minmax(0, 1fr); gap: 14px; }
+      .cost-chart-legend { grid-template-columns: 1fr; }
     }
     @media (max-width: 520px) {
       main { padding: 0 13px 35px; }
@@ -449,6 +511,10 @@
       .filter-select { flex: 1; }
       .provider-results { grid-template-columns: 1fr; padding: 12px; }
       .cost-summary { grid-template-columns: 1fr; }
+      .cost-chart-layout { grid-template-columns: 1fr; gap: 12px; }
+      .cost-chart { width: min(100%, 210px); }
+      .cost-chart-legend { grid-template-columns: 1fr; }
+      .cost-chart-label { white-space: normal; }
       .booking-overview-card { grid-template-columns: minmax(0, 1fr); }
       .booking-status, .booking-overview-dates, .booking-overview-meta, .booking-overview-notes { grid-column: 1; }
       .booking-overview-dates { gap: 7px; }
@@ -463,6 +529,8 @@
       .profile-grid { grid-template-columns: 1fr; }
       .inspection-settings { grid-template-columns: 1fr; }
       .inspection-settings-list { grid-template-columns: 1fr; }
+      .inspection-archive-row { align-items: flex-start; flex-direction: column; }
+      .inspection-archive-actions { width: 100%; }
       .calendar-toolbar { flex-wrap: wrap; justify-content: center; gap: 6px; }
       .calendar-toolbar strong { min-width: 105px; }
       .calendar-grid { overflow: hidden; }
@@ -547,6 +615,18 @@
           <div class="form-actions"><button type="button" class="secondary-btn" id="cancel-property-modal">Abbrechen</button><button type="submit" class="primary-btn">Ferienhaus speichern</button></div>
         </form>
       </div>
+  <div class="modal-backdrop" id="inspection-confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="inspection-confirmation-title">
+    <section class="modal inspection-confirmation-modal">
+      <div class="modal-head"><div><h2 id="inspection-confirmation-title">Prüfprotokoll</h2><p id="inspection-confirmation-subtitle">Abwesenheitskontrolle</p></div><button class="close-btn" type="button" id="close-inspection-confirmation" aria-label="Schließen">✕</button></div>
+      <p class="inspection-report-summary" id="inspection-report-summary"></p>
+      <h3 class="card-title">Angaben zum Haus</h3>
+      <dl class="inspection-report-house" id="inspection-report-house"></dl>
+      <h3 class="card-title">Geprüfte Positionen</h3>
+      <ul class="inspection-report-list" id="inspection-report-list"></ul>
+      <div class="form-actions"><button type="button" class="secondary-btn" id="cancel-inspection-confirmation">Abbrechen</button><button type="button" class="secondary-btn" id="export-inspection-pdf">Als PDF exportieren</button><button type="button" class="primary-btn" id="save-inspection-report">Kontrolle protokollieren</button></div>
+    </section>
+  </div>
+  <div class="inspection-print-area" id="inspection-print-area" aria-hidden="true"></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script>
     const icon = (name) => {
@@ -843,6 +923,7 @@
     let documentsProperty = properties[0].id;
     let inspectionProperty = properties[0].id;
     let inspectionView = 'absence';
+    let pendingInspection = null;
     const firstCalendarEventDate = guestChanges[0]?.date || localDateKey(new Date());
     let calendarMonth = new Date(Number(firstCalendarEventDate.slice(0, 4)), Number(firstCalendarEventDate.slice(5, 7)) - 1, 1);
     let calendarSelectedDate = firstCalendarEventDate;
@@ -1127,7 +1208,7 @@
       const tagClass = task.priority === 'urgent' ? 'urgent' : task.priority === 'soon' ? 'soon' : '';
       return `<div class="task-row">
         <button class="check ${task.done ? 'done' : ''}" data-toggle="${task.id}" aria-label="${task.done ? 'Als offen markieren' : 'Als erledigt markieren'}">${task.done ? icon('check') : ''}</button>
-        <div class="task-main"><button class="task-name ${task.done ? 'completed' : ''}" type="button" data-edit-task="${task.id}" aria-label="Aufgabe bearbeiten: ${escapeHtml(task.title)}">${escapeHtml(task.title)}</button><div class="task-meta"><span>${escapeHtml(task.property)}</span><span class="task-tag ${tagClass}">${priority}</span></div></div>
+        <div class="task-main"><button class="task-name ${task.done ? 'completed' : ''}" type="button" data-edit-task="${task.id}" aria-label="Aufgabe bearbeiten: ${escapeHtml(task.title)}">${escapeHtml(task.title)}</button><div class="task-meta"><span>${escapeHtml(task.property)}</span><span class="task-tag ${tagClass}">${priority}</span></div>        </div>
         <div class="task-due">${fmtDate(task.date)}</div>
       </div>`;
     }
@@ -1484,9 +1565,24 @@
       const costs = annualCosts[property.id] || initialCosts[property.id];
       const total = costCategories.reduce((sum, category) => sum + Math.max(0, Number(costs[category.id]) || 0), 0);
       const money = (amount) => new Intl.NumberFormat('sv-SE', { maximumFractionDigits: 0 }).format(amount) + ' kr';
+      const chartColors = ['#315c49', '#c17b4a', '#6f8d70', '#d1a64a', '#728da1', '#b66a60', '#9b805b', '#788c83', '#a27691'];
+      let chartOffset = 0;
+      const chartSlices = costCategories.map((category, index) => {
+        const value = Math.max(0, Number(costs[category.id]) || 0);
+        const share = total ? value / total * 100 : 0;
+        const slice = `<circle class="cost-chart-slice" data-cost-chart-slice="${category.id}" cx="100" cy="100" r="76" pathLength="100" stroke="${chartColors[index % chartColors.length]}" stroke-dasharray="${share} ${100 - share}" stroke-dashoffset="${-chartOffset}" style="--slice-dash:${share};--slice-gap:${100 - share};--slice-delay:${index * 55}ms"></circle>`;
+        chartOffset += share;
+        return slice;
+      }).join('');
+      const chartLegend = costCategories.map((category, index) => {
+        const value = Math.max(0, Number(costs[category.id]) || 0);
+        const share = total ? value / total * 100 : 0;
+        return `<li data-cost-chart-item="${category.id}"><span class="cost-chart-swatch" style="background:${chartColors[index % chartColors.length]}"></span><span class="cost-chart-label">${escapeHtml(category.label)}</span><span class="cost-chart-values"><strong data-cost-chart-amount>${money(value)}</strong><small data-cost-chart-share>${new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 }).format(share)}%</small></span></li>`;
+      }).join('');
       return `<div class="welcome"><div><p class="eyebrow">Årlig planering · SEK</p><h1>Ferienhaus-Kosten</h1><p class="subtitle">Planwerte pro Ferienhaus bearbeiten und laufende Kosten im Blick behalten.</p></div></div>
         <div class="section-toolbar"><label><span class="form-label">Ferienhaus</span><select id="cost-property" class="filter-select" aria-label="Ferienhaus für Jahreskosten wählen">${properties.map((item) => `<option value="${item.id}" ${item.id === property.id ? 'selected' : ''}>${escapeHtml(item.name)} · ${escapeHtml(item.region)}</option>`).join('')}</select></label></div>
         <div class="cost-summary"><article class="cost-total"><small>Geschätzte Jahreskosten · ${escapeHtml(property.name)}</small><strong id="annual-total">${money(total)}</strong><span>Ändere die Beträge unten, um dein eigenes Budget abzubilden.</span></article><article class="card cost-average"><span>Monatlicher Budgetdurchschnitt</span><strong id="monthly-total">${money(Math.round(total / 12))}</strong></article></div>
+        <section class="card cost-chart-card"><div class="card-head"><div><h2 class="card-title">Kostenverteilung</h2><p class="card-caption">Anteil der einzelnen Posten an den Jahreskosten · ${escapeHtml(property.name)}</p></div></div><div class="cost-chart-layout"><div class="cost-chart-visual"><svg class="cost-chart" viewBox="0 0 200 200" aria-hidden="true"><circle class="cost-chart-track" cx="100" cy="100" r="76"></circle>${chartSlices}<text class="cost-chart-center-total" x="100" y="98" text-anchor="middle">${escapeHtml(new Intl.NumberFormat('sv-SE', { maximumFractionDigits: 0 }).format(total))}</text><text class="cost-chart-center-caption" x="100" y="114" text-anchor="middle">SEK pro Jahr</text></svg></div><ul class="cost-chart-legend">${chartLegend}</ul></div></section>
         <section class="card"><div class="card-head"><div><h2 class="card-title">Jährliche Kostenposten</h2><p class="card-caption">Beträge in Schwedischen Kronen (SEK) pro Jahr</p></div><span class="status pending">Planwerte bearbeiten</span></div>
           <div class="cost-list">${costCategories.map((category) => `<label class="cost-item"><span class="cost-item-main"><strong>${escapeHtml(category.label)}</strong><small>${escapeHtml(category.note)}</small></span><span class="cost-input-wrap"><input class="cost-input" type="number" min="0" step="100" inputmode="numeric" data-cost="${category.id}" aria-label="${escapeHtml(category.label)} pro Jahr" value="${Number(costs[category.id]) || 0}"><span>kr/Jahr</span></span></label>`).join('')}</div>
           <div class="cost-disclaimer">Orientierungsbudget, keine Kostenprognose: Versicherungs-, Energie-, Wasser-/Abwasser-, Abfall-, Kamin- und Wartungskosten unterscheiden sich je nach Haus, Nutzung und Gemeinde. Die Werte sind editierbare Beispiel-Planwerte. Die Immobilienabgabe 2026 ist mit dem gesetzlichen Höchstbetrag von 10 425 kr angesetzt; sie beträgt grundsätzlich 0,75 % des Steuerwerts bis zum Höchstbetrag. Ersetze Planwerte durch Bescheide und Angebote.</div>
@@ -1514,6 +1610,7 @@
       const absenceProgress = selectedItems.length ? Math.round(complete / selectedItems.length * 100) : 0;
       const cadence = inspectionCadence[property.id] === 'weekly' ? 'weekly' : 'monthly';
       const entries = inspectionLogEntries(property.id);
+      const archiveEntries = entries.map((entry, index) => ({ entry, index })).reverse();
       const lastVisit = entries.length ? formatInspectionDate(entries[entries.length - 1].date) : 'Noch keine Kontrolle protokolliert';
       const today = localDateKey(new Date());
       const oversightProviders = providers.filter((provider) => provider.category === 'inspection' && Number.isFinite(provider.distances[property.id]) && provider.distances[property.id] <= providerRadius);
@@ -1542,7 +1639,12 @@
           ${selectedItems.length ? `<div class="checklist">${selectedItems.map((item) => `<label class="checklist-item"><input type="checkbox" data-inspection-check="${item.id}" ${checks[item.id] ? 'checked' : ''}><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.detail)}</small></span></label>`).join('')}</div>` : '<div class="empty">Wähle oben mindestens einen Prüfpunkt für dieses Haus aus.</div>'}
           <div class="inspection-completion-date"><label class="form-label" for="inspection-completed-date">Tatsächlich durchgeführt am</label><input class="form-control" id="inspection-completed-date" type="date" max="${today}" value="${today}" ${!selectedItems.length || complete < selectedItems.length ? 'disabled' : ''}></div>
           <div class="inspection-status">Bei akuter Gefahr, Wasserschaden oder Einbruch: Abstand halten und Eigentümer bzw. zuständigen Notdienst informieren. Die Prüfliste ist eine organisatorische Hilfe und ersetzt keine fachgerechte Prüfung.</div>
-          ${entries.length ? `<div class="inspection-history"><strong>Protokollierte Termine:</strong> ${entries.slice().reverse().map((entry) => escapeHtml(formatInspectionDate(entry.date))).join(' · ')}</div>` : ''}
+        </section>
+        <section class="card"><div class="card-head"><div><h2 class="card-title">Archiv der Prüfprotokolle</h2><p class="card-caption">${entries.length} ${entries.length === 1 ? 'Protokoll' : 'Protokolle'} für ${escapeHtml(property.name)}</p></div></div>
+          ${archiveEntries.length ? `<div class="inspection-archive-list">${archiveEntries.map(({ entry, index }) => {
+            const checkedItems = Array.isArray(entry.checkedItemsSnapshot) ? entry.checkedItemsSnapshot.length : entry.checkedItems?.length || 0;
+            return `<article class="inspection-archive-row"><div class="inspection-archive-main"><strong>Abwesenheitskontrolle · ${escapeHtml(formatInspectionDate(entry.date))}</strong><small>${checkedItems} geprüfte ${checkedItems === 1 ? 'Position' : 'Positionen'}${entry.completedAt ? ` · gespeichert ${escapeHtml(new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' }).format(new Date(entry.completedAt)))}` : ''}</small></div><div class="inspection-archive-actions"><button class="secondary-btn" type="button" data-inspection-archive="${index}">Protokoll ansehen / PDF</button></div></article>`;
+          }).join('')}</div><p class="inspection-archive-note">Das Archiv wird lokal in diesem Browser gespeichert. Für eine externe Ablage kannst du ein Protokoll öffnen und als PDF sichern.</p>` : '<div class="empty">Für dieses Ferienhaus sind noch keine Prüfprotokolle archiviert.</div>'}
         </section>
         <section class="card"><div class="card-head"><div><h2 class="card-title">Lokale Hauskontrolle im ${providerRadius}-km-Umkreis</h2><p class="card-caption">${oversightProviders.length} Anbieter mit veröffentlichtem Angebot zur Hausaufsicht</p></div><button class="text-btn" data-action="find-inspectors">Alle Servicepartner →</button></div>
           ${oversightProviders.length ? oversightProviders.map((provider) => `<div class="provider-card"><div class="provider-avatar">${escapeHtml(provider.initials)}</div><div class="provider-info"><strong>${escapeHtml(provider.name)}</strong><small>${escapeHtml(provider.services)} · ca. ${provider.distances[property.id]} km</small><span class="provider-contact-links">${providerContactLinks(provider)}</span></div></div>`).join('') : '<div class="empty">Für diesen Standort ist noch kein Anbieter mit ausdrücklich belegter Hauskontrolle hinterlegt.</div>'}
@@ -1570,6 +1672,119 @@
         return false;
       }
     }
+    function inspectionHouseDetails(property) {
+      return [
+        ['Ferienhaus', property.name],
+        ['Adresse / Ort', property.address],
+        ['Region', property.region],
+        ['Baujahr', property.yearBuilt],
+        ['Wohnfläche', property.livingArea ? `${property.livingArea} m²` : ''],
+        ['Grundstück', property.plotSize ? `${property.plotSize} m²` : ''],
+        ['Zimmer', property.rooms],
+        ['Schlafplätze', property.beds],
+        ['Heizsystem', property.heatingSystem],
+        ['Baujahr der Heizung', property.heatingYear]
+      ].filter(([, value]) => String(value || '').trim());
+    }
+    function openInspectionConfirmation(inspection, archived = false) {
+      pendingInspection = inspection;
+      document.getElementById('inspection-confirmation-subtitle').textContent = `${archived ? 'Archiv · ' : ''}${inspection.property.name} · ${formatInspectionDate(inspection.date)}`;
+      document.getElementById('inspection-report-summary').textContent = archived
+        ? `${inspection.checkedItems.length} archivierte Prüfpunkte. Dieses gespeicherte Protokoll kann erneut als PDF exportiert werden.`
+        : `${inspection.checkedItems.length} Prüfpunkte wurden vollständig abgehakt. Kontrolliere die Hausangaben und exportiere das Prüfprotokoll bei Bedarf als PDF.`;
+      document.getElementById('save-inspection-report').hidden = archived;
+      document.getElementById('inspection-report-house').innerHTML = inspection.houseDetails
+        .map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join('');
+      document.getElementById('inspection-report-list').innerHTML = inspection.checkedItems
+        .map((item) => `<li><span class="inspection-report-check" aria-hidden="true">✓</span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.detail)}</small></span></li>`).join('');
+      document.getElementById('inspection-confirmation-modal').classList.add('open');
+      document.getElementById('export-inspection-pdf').focus();
+    }
+    function openArchivedInspection(entry) {
+      const savedProperty = entry.property || properties.find((property) => property.id === inspectionProperty) || {};
+      const property = {
+        id: savedProperty.id || inspectionProperty,
+        name: savedProperty.name || 'Ferienhaus',
+        address: savedProperty.address || '',
+        region: savedProperty.region || '',
+        yearBuilt: savedProperty.yearBuilt || '',
+        livingArea: savedProperty.livingArea || '',
+        plotSize: savedProperty.plotSize || '',
+        rooms: savedProperty.rooms || '',
+        beds: savedProperty.beds || '',
+        heatingSystem: savedProperty.heatingSystem || '',
+        heatingYear: savedProperty.heatingYear || ''
+      };
+      const checkedItems = Array.isArray(entry.checkedItemsSnapshot)
+        ? entry.checkedItemsSnapshot
+          .filter((item) => item && typeof item.id === 'string' && typeof item.title === 'string')
+          .map((item) => ({ id: item.id, title: item.title, detail: typeof item.detail === 'string' ? item.detail : '' }))
+        : entry.checkedItems.map((id) => absenceChecklist.find((item) => item.id === id))
+          .filter(Boolean)
+          .map(({ id, title, detail }) => ({ id, title, detail }));
+      openInspectionConfirmation({
+        property,
+        houseDetails: inspectionHouseDetails(property),
+        date: entry.date,
+        checkedItemIds: checkedItems.map((item) => item.id),
+        checkedItems
+      }, true);
+    }
+    function closeInspectionConfirmation() {
+      pendingInspection = null;
+      document.getElementById('inspection-confirmation-modal').classList.remove('open');
+    }
+    function exportInspectionPdf() {
+      if (!pendingInspection) return;
+      const { property, houseDetails, checkedItems, date } = pendingInspection;
+      const createdDate = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' }).format(new Date());
+      document.getElementById('inspection-print-area').innerHTML = `<main class="inspection-print-page">
+        <p class="inspection-print-eyebrow">Husora · Hauskontrolle</p>
+        <h1>Prüfprotokoll</h1>
+        <p class="inspection-print-meta">Abwesenheitskontrolle · durchgeführt am ${escapeHtml(formatInspectionDate(date))}</p>
+        <h2>Angaben zum Haus</h2>
+        <dl class="inspection-print-house">${houseDetails.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join('')}</dl>
+        <h2>Geprüfte Positionen</h2>
+        <ul class="inspection-print-checklist">${checkedItems.map((item) => `<li><span class="inspection-print-check">✓</span><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.detail)}</small></span></li>`).join('')}</ul>
+        <p class="inspection-print-meta">Protokoll erstellt am ${escapeHtml(createdDate)}.</p>
+      </main>`;
+      window.print();
+    }
+    function saveInspectionReport() {
+      if (!pendingInspection) return;
+      const { property, date, checkedItemIds, checkedItems } = pendingInspection;
+      const entries = inspectionLogEntries(property.id);
+      entries.push({
+        date,
+        completedAt: new Date().toISOString(),
+        checkedItems: checkedItemIds.slice(),
+        checkedItemsSnapshot: checkedItems.map((item) => ({ ...item })),
+        property: { ...property }
+      });
+      const nextLog = { ...inspectionLog, [property.id]: entries };
+      try {
+        localStorage.setItem('stugliv-inspection-log', JSON.stringify(nextLog));
+      } catch (error) {
+        console.error('Prüfprotokoll konnte nicht archiviert werden:', error);
+        showToast('Prüfprotokoll konnte nicht archiviert werden. Browser-Speicher prüfen.');
+        return;
+      }
+      inspectionLog = nextLog;
+      const nextChecks = { ...inspectionChecks, [property.id]: {} };
+      let checksCleared = true;
+      try {
+        localStorage.setItem('stugliv-inspection-checks', JSON.stringify(nextChecks));
+        inspectionChecks = nextChecks;
+      } catch (error) {
+        checksCleared = false;
+        console.error('Abgehakte Prüfpunkte konnten nach dem Archivieren nicht zurückgesetzt werden:', error);
+      }
+      closeInspectionConfirmation();
+      render();
+      showToast(checksCleared
+        ? 'Prüfprotokoll wurde im Hauskontroll-Archiv gespeichert.'
+        : 'Prüfprotokoll ist archiviert; die Prüfpunkte konnten nicht zurückgesetzt werden.');
+    }
     function finishInspection() {
       const checks = inspectionChecks[inspectionProperty] || {};
       const selectedIds = Array.isArray(inspectionSelections[inspectionProperty]) ? inspectionSelections[inspectionProperty] : absenceChecklist.map((item) => item.id);
@@ -1587,13 +1802,31 @@
         showToast('Bitte ein gültiges Datum der durchgeführten Kontrolle eintragen.');
         return;
       }
-      const entries = inspectionLogEntries(inspectionProperty);
-      entries.push({ date: completedDate, completedAt: new Date().toISOString(), checkedItems: selectedIds.slice() });
-      inspectionLog[inspectionProperty] = entries;
-      inspectionChecks[inspectionProperty] = {};
-      persistInspectionData();
-      render();
-      showToast('Hauskontrolle wurde mit Datum protokolliert.');
+      const property = properties.find((item) => item.id === inspectionProperty);
+      if (!property) {
+        showToast('Das Ferienhaus für diese Kontrolle wurde nicht gefunden.');
+        return;
+      }
+      const propertySnapshot = {
+        id: property.id,
+        name: property.name,
+        address: property.address || '',
+        region: property.region || '',
+        yearBuilt: property.yearBuilt || '',
+        livingArea: property.livingArea || '',
+        plotSize: property.plotSize || '',
+        rooms: property.rooms || '',
+        beds: property.beds || '',
+        heatingSystem: property.heatingSystem || '',
+        heatingYear: property.heatingYear || ''
+      };
+      openInspectionConfirmation({
+        property: propertySnapshot,
+        houseDetails: inspectionHouseDetails(propertySnapshot),
+        date: completedDate,
+        checkedItemIds: selectedItems.map((item) => item.id),
+        checkedItems: selectedItems.map(({ id, title, detail }) => ({ id, title, detail }))
+      });
     }
     function localDateKey(date) {
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -1734,6 +1967,13 @@
       if (inspectionViewButton) {
         inspectionView = inspectionViewButton.dataset.inspectionView;
         render();
+        return;
+      }
+      const archivedInspectionButton = event.target.closest('[data-inspection-archive]');
+      if (archivedInspectionButton) {
+        const archiveIndex = Number(archivedInspectionButton.dataset.inspectionArchive);
+        const archivedEntry = inspectionLogEntries(inspectionProperty)[archiveIndex];
+        if (archivedEntry) openArchivedInspection(archivedEntry);
         return;
       }
       const bookingMonthButton = event.target.closest('[data-booking-month]');
@@ -1971,6 +2211,22 @@
         const money = (amount) => new Intl.NumberFormat('sv-SE', { maximumFractionDigits: 0 }).format(amount) + ' kr';
         document.getElementById('annual-total').textContent = money(total);
         document.getElementById('monthly-total').textContent = money(Math.round(total / 12));
+        const chartTotal = total;
+        document.querySelector('.cost-chart-center-total').textContent = new Intl.NumberFormat('sv-SE', { maximumFractionDigits: 0 }).format(chartTotal);
+        let chartOffset = 0;
+        costCategories.forEach((category) => {
+          const value = Math.max(0, Number(costs[category.id]) || 0);
+          const share = chartTotal ? value / chartTotal * 100 : 0;
+          const slice = pageContent.querySelector(`[data-cost-chart-slice="${category.id}"]`);
+          const legendItem = pageContent.querySelector(`[data-cost-chart-item="${category.id}"]`);
+          if (!slice || !legendItem) return;
+          slice.style.animation = 'none';
+          slice.setAttribute('stroke-dasharray', `${share} ${100 - share}`);
+          slice.setAttribute('stroke-dashoffset', `${-chartOffset}`);
+          chartOffset += share;
+          legendItem.querySelector('[data-cost-chart-amount]').textContent = money(value);
+          legendItem.querySelector('[data-cost-chart-share]').textContent = `${new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 }).format(share)}%`;
+        });
       }
     });
     pageContent.addEventListener('change', async (event) => {
@@ -2275,10 +2531,18 @@
     document.getElementById('task-modal').addEventListener('click', (event) => {
       if (event.target.id === 'task-modal') closeTaskModal();
     });
+    document.getElementById('close-inspection-confirmation').addEventListener('click', closeInspectionConfirmation);
+    document.getElementById('cancel-inspection-confirmation').addEventListener('click', closeInspectionConfirmation);
+    document.getElementById('export-inspection-pdf').addEventListener('click', exportInspectionPdf);
+    document.getElementById('save-inspection-report').addEventListener('click', saveInspectionReport);
+    document.getElementById('inspection-confirmation-modal').addEventListener('click', (event) => {
+      if (event.target.id === 'inspection-confirmation-modal') closeInspectionConfirmation();
+    });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         closeTaskModal();
         closePropertyModal();
+        closeInspectionConfirmation();
       }
     });
     document.getElementById('notify-button').addEventListener('click', () => showToast('Du bist auf dem neuesten Stand.'));
