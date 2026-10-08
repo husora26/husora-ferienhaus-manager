@@ -277,6 +277,13 @@
     .modal-backdrop { position: fixed; inset: 0; z-index: 10; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(25, 34, 28, .36); }
     .modal-backdrop.open { display: flex; }
     .modal { width: min(440px, 100%); padding: 23px; border: 1px solid var(--line); border-radius: 14px; background: white; box-shadow: 0 24px 80px rgba(0, 0, 0, .18); }
+    .qr-modal { width: min(360px, 100%); text-align: center; }
+    .qr-modal .modal-head { text-align: left; }
+    .qr-image { display: block; width: 240px; height: 240px; max-width: 100%; margin: 0 auto 14px; }
+    .qr-image[hidden] { display: none; }
+    .qr-link { display: block; overflow-wrap: anywhere; color: var(--green); font-size: 11px; }
+    .qr-hint { margin: 12px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    #qr-modal { z-index: 40; }
     .modal-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
     .modal h2 { margin: 0; font-size: 18px; letter-spacing: -.4px; }
     .modal-head p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
@@ -449,6 +456,7 @@
             <button class="icon-btn" id="notify-button" aria-label="Dringende Aufgaben" title="Dringende Aufgaben" aria-expanded="false" aria-controls="notification-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="dot"></span></button>
             <section class="notification-panel" id="notification-panel" aria-label="Dringendste Aufgaben"></section>
           </div>
+          <button class="icon-btn" id="qr-button" aria-label="App auf dem Handy öffnen" title="App auf dem Handy öffnen" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM19 14h2v2h-2zM19 19h2v2h-2zM14 19h2v2h-2z"/></svg></button>
           <button class="icon-btn" id="settings-button" aria-label="Benutzer und Einstellungen" title="Benutzer und Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.4.8l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.4-.8l-1.7.7-1.4-2.4 1.4-1.1a7 7 0 0 1 0-1.7l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.4-.8l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.4.8l1.7-.7 1.4 2.4-1.4 1.1a7 7 0 0 1 0 1.7z" transform="translate(-1 -1)"/></svg></button>
         </div>
       </header>
@@ -482,6 +490,14 @@
       </div>
       <div class="form-actions"><button type="button" class="secondary-btn" id="cancel-modal">Abbrechen</button><button type="submit" class="primary-btn">Aufgabe speichern</button></div>
     </form>
+  </div>
+  <div class="modal-backdrop" id="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
+    <section class="modal qr-modal">
+      <div class="modal-head"><div><h2 id="qr-modal-title">App auf dem Handy öffnen</h2><p>Scanne diesen Code mit der Handykamera.</p></div><button class="close-btn" type="button" id="close-qr-modal" aria-label="Schließen">✕</button></div>
+      <img class="qr-image" id="qr-image" alt="QR-Code zum Öffnen der Husora-App">
+      <a class="qr-link" id="qr-link"></a>
+      <p class="qr-hint" id="qr-hint">Der QR-Code öffnet diese App-Adresse. Die App muss dafür über eine vom Handy erreichbare Webadresse aufgerufen werden.</p>
+    </section>
   </div>
       <div class="modal-backdrop" id="property-modal" role="dialog" aria-modal="true" aria-labelledby="property-modal-title">
         <form class="modal property-modal" id="property-form">
@@ -2137,9 +2153,39 @@
       }
     });
     document.getElementById('notify-button').addEventListener('click', () => showToast('Du bist auf dem neuesten Stand.'));
+    const qrModal = document.getElementById('qr-modal');
+    const qrImage = document.getElementById('qr-image');
+    const qrHint = document.getElementById('qr-hint');
+    function closeQrModal() {
+      qrModal.classList.remove('open');
+    }
+    document.getElementById('qr-button').addEventListener('click', () => {
+      const appUrl = `${window.location.origin}${window.location.pathname}`;
+      const qrLink = document.getElementById('qr-link');
+      qrLink.href = appUrl;
+      qrLink.textContent = appUrl;
+      if (window.location.protocol === 'file:' || ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)) {
+        qrImage.hidden = true;
+        qrHint.textContent = 'Diese lokale Adresse ist auf dem Handy nicht erreichbar. Öffne die App zuerst über eine öffentlich oder im lokalen Netzwerk erreichbare Webadresse.';
+      } else {
+        qrImage.hidden = false;
+        qrHint.textContent = 'Der QR-Code öffnet diese App-Adresse. Die App muss dafür über eine vom Handy erreichbare Webadresse aufgerufen werden.';
+        qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(appUrl)}`;
+      }
+      qrModal.classList.add('open');
+    });
+    document.getElementById('close-qr-modal').addEventListener('click', closeQrModal);
+    qrModal.addEventListener('click', (event) => {
+      if (event.target === qrModal) closeQrModal();
+    });
+    qrImage.addEventListener('error', () => {
+      qrImage.hidden = true;
+      qrHint.textContent = 'Der QR-Code konnte nicht geladen werden. Öffne den Link oben direkt auf deinem Handy.';
+    });
     document.getElementById('settings-button').addEventListener('click', () => { currentPage = 'profile'; render(); });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
+        closeQrModal();
         const menu = document.getElementById('main-menu');
         const toggleButton = document.getElementById('menu-toggle');
         menu.classList.remove('open');
