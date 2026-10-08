@@ -74,9 +74,6 @@
     .dot[hidden] { display: none; }
     .icon-btn { position: relative; display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 10px; color: #59635b; background: white; }
     .icon-btn svg { width: 16px; height: 16px; }
-    .back-button { width: 32px; height: 32px; border-radius: 9px; }
-    .back-button svg { width: 17px; height: 17px; }
-    .back-button[hidden] { display: none; }
     .dot { position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border: 1px solid white; border-radius: 50%; background: #d18b43; }
     .page { padding-top: 31px; }
     .welcome { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 25px; }
@@ -485,7 +482,6 @@
       <header class="topbar">
         <div class="breadcrumb"><button class="breadcrumb-home" data-page="dashboard" aria-label="Zur Übersicht" title="Zur Übersicht"><svg viewBox="0 0 42 36" aria-hidden="true"><path d="M3 19 16 7l13 12M6 17v14h19V17M11 23h3v3h-3zm7 0h3v3h-3z" fill="none" stroke="#fff9eb" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3"/><path d="M34 2 29 10h3l-5 6h4l-4 7h6v8h3v-8h6l-4-7h4l-5-6h3z" fill="#b9955f"/></svg></button><span class="brand-lockup"><span class="brand-wordmark"><span class="breadcrumb-brand">HUSORA</span><span class="brand-region">Ditt hem i Sverige</span></span></span><span class="breadcrumb-separator" aria-hidden="true">/</span><b id="breadcrumb">Übersicht</b></div>
         <div class="top-actions">
-          <button class="icon-btn back-button" id="back-button" type="button" aria-label="Zur vorherigen Seite" title="Zur vorherigen Seite" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h11"/></svg></button>
           <div class="notification-wrap">
             <button class="icon-btn" id="notify-button" aria-label="Dringende Aufgaben" title="Dringende Aufgaben" aria-expanded="false" aria-controls="notification-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span class="dot"></span></button>
             <section class="notification-panel" id="notification-panel" aria-label="Dringendste Aufgaben"></section>
@@ -1160,10 +1156,9 @@
     function dashboard() {
       const open = tasks.filter((task) => !task.done);
       const today = localDateKey(new Date());
-      const weekEnd = new Date();
-      weekEnd.setDate(weekEnd.getDate() + 7);
       const upcomingChanges = bookings
-        .filter((booking) => booking.startDate >= today && booking.startDate <= localDateKey(weekEnd))
+        .filter((booking) => booking.endDate >= today)
+        .sort((a, b) => a.startDate.localeCompare(b.startDate))
         .map((booking) => ({
           title: `Check-in · ${booking.guestName}`,
           property: properties.find((property) => property.id === booking.propertyId)?.name || 'Ferienhaus',
@@ -1197,7 +1192,7 @@
         <section class="stats" aria-label="Kennzahlen">
           <button class="stat" data-page="properties"><img class="stat-art" src="assets/meine-haeuser.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Meine Häuser</span><span class="stat-icon">${icon('property')}</span></div><div class="stat-value">${properties.length}</div><div class="stat-note"><em>Värmland · Dalarna · Bohuslän</em></div></button>
           <button class="stat" data-page="tasks"><img class="stat-art" src="assets/hausservice.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Serviceaufgaben</span><span class="stat-icon amber">${icon('task')}</span></div><div class="stat-value">${open.length}</div><div class="stat-note"><em>${open.filter((task) => task.priority === 'urgent').length} dringend</em> vor der nächsten Buchung</div></button>
-          <button class="stat" data-page="bookings"><img class="stat-art" src="assets/booking-planer.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Buchungen</span><span class="stat-icon">${icon('calendar')}</span></div><div class="stat-value">${upcomingChanges.length}</div><div class="stat-note">Buchungen <em>verwalten</em></div></button>
+          <button class="stat" data-page="bookings"><img class="stat-art" src="assets/booking-planer.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Buchungen</span><span class="stat-icon">${icon('calendar')}</span></div><div class="stat-value">${bookings.length}</div><div class="stat-note">Buchungen <em>verwalten</em></div></button>
           <button class="stat stat-inspection" data-page="inspections"><img class="stat-art" src="assets/hauskontrolle.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Hauskontrolle</span><span class="stat-icon">${icon('inspection')}</span></div><div class="stat-value">${currentInspections}/${properties.length}</div><div class="stat-note"><em>${currentInspections === properties.length ? 'Alle Kontrollen aktuell' : `${properties.length - currentInspections} Prüfung${properties.length - currentInspections === 1 ? '' : 'en'} offen`}</em></div></button>
           <button class="stat" data-page="documents"><img class="stat-art" src="assets/dokumente.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Dokumente</span><span class="stat-icon">${icon('document')}</span></div><div class="stat-value">${documents.length}</div><div class="stat-note"><em>${documents.length === 1 ? 'Datei' : 'Dateien'}</em> gespeichert</div></button>
           <button class="stat" data-page="costs"><img class="stat-art" src="assets/kosten.jpg" alt="" aria-hidden="true"><div class="stat-head"><span>Kosten</span><span class="stat-icon">${icon('cost')}</span></div><div class="stat-value">${formattedCost} kr</div><div class="stat-note"><em>Planwerte</em> pro Jahr · alle Häuser</div></button>
@@ -1516,6 +1511,7 @@
       const selectedIds = Array.isArray(inspectionSelections[property.id]) ? inspectionSelections[property.id] : absenceChecklist.map((item) => item.id);
       const selectedItems = absenceChecklist.filter((item) => selectedIds.includes(item.id));
       const complete = selectedItems.filter((item) => checks[item.id]).length;
+      const absenceProgress = selectedItems.length ? Math.round(complete / selectedItems.length * 100) : 0;
       const cadence = inspectionCadence[property.id] === 'weekly' ? 'weekly' : 'monthly';
       const entries = inspectionLogEntries(property.id);
       const lastVisit = entries.length ? formatInspectionDate(entries[entries.length - 1].date) : 'Noch keine Kontrolle protokolliert';
@@ -1542,7 +1538,7 @@
           </div>
           <div class="inspection-status">Taktung: ${cadence === 'weekly' ? 'wöchentlich' : 'monatlich'} · Zuletzt tatsächlich durchgeführt: ${escapeHtml(lastVisit)}${entries.length > 1 ? ` · ${entries.length} protokollierte Kontrollen` : ''}</div>
         </section>
-        <section class="card"><div class="card-head"><div><h2 class="card-title">Prüfliste bei Abwesenheit</h2><p class="card-caption">${complete} von ${selectedItems.length} ausgewählten Punkten erledigt</p></div><span class="status ${selectedItems.length && complete === selectedItems.length ? '' : 'pending'}">${selectedItems.length && complete === selectedItems.length ? 'Bereit zum Protokollieren' : selectedItems.length ? 'Kontrolle offen' : 'Keine Prüfpunkte ausgewählt'}</span></div>
+        <section class="card"><div class="card-head"><div><h2 class="card-title">Prüfliste bei Abwesenheit</h2><p class="card-caption">${complete} von ${selectedItems.length} ausgewählten Punkten erledigt</p></div>${selectedItems.length ? `<div class="winter-progress"><progress max="${selectedItems.length}" value="${complete}" aria-label="${complete} von ${selectedItems.length} Abwesenheitspunkten erledigt"></progress><strong>${absenceProgress} %</strong></div>` : ''}<span class="status ${selectedItems.length && complete === selectedItems.length ? '' : 'pending'}">${selectedItems.length && complete === selectedItems.length ? 'Bereit zum Protokollieren' : selectedItems.length ? 'Kontrolle offen' : 'Keine Prüfpunkte ausgewählt'}</span></div>
           ${selectedItems.length ? `<div class="checklist">${selectedItems.map((item) => `<label class="checklist-item"><input type="checkbox" data-inspection-check="${item.id}" ${checks[item.id] ? 'checked' : ''}><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.detail)}</small></span></label>`).join('')}</div>` : '<div class="empty">Wähle oben mindestens einen Prüfpunkt für dieses Haus aus.</div>'}
           <div class="inspection-completion-date"><label class="form-label" for="inspection-completed-date">Tatsächlich durchgeführt am</label><input class="form-control" id="inspection-completed-date" type="date" max="${today}" value="${today}" ${!selectedItems.length || complete < selectedItems.length ? 'disabled' : ''}></div>
           <div class="inspection-status">Bei akuter Gefahr, Wasserschaden oder Einbruch: Abstand halten und Eigentümer bzw. zuständigen Notdienst informieren. Die Prüfliste ist eine organisatorische Hilfe und ersetzt keine fachgerechte Prüfung.</div>
@@ -1660,7 +1656,6 @@
         lastRenderedPage = currentPage;
       }
       document.getElementById('breadcrumb').textContent = labels[currentPage];
-      document.getElementById('back-button').hidden = currentPage === 'dashboard';
       document.getElementById('nav-count').textContent = tasks.filter((task) => !task.done).length;
       document.querySelectorAll('.nav [data-page]').forEach((button) => button.classList.toggle('active', button.dataset.page === currentPage || (currentPage === 'propertyDetail' && button.dataset.page === 'properties')));
       updateProfileSummary();
@@ -1724,10 +1719,6 @@
       const menuToggle = event.target.closest('#menu-toggle');
       const menu = document.getElementById('main-menu');
       const toggleButton = document.getElementById('menu-toggle');
-      if (event.target.closest('#back-button')) {
-        goBack();
-        return;
-      }
       if (menuToggle) {
         const isOpen = menu.classList.toggle('open');
         toggleButton.setAttribute('aria-expanded', String(isOpen));
